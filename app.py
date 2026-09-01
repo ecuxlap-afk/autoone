@@ -53,6 +53,32 @@ def chat():
             'status': 'error'
         }), 500
 
+@app.route('/api/customer/chat', methods=['POST'])
+def customer_api_chat():
+    """
+    Public Customer Messaging API for external website integration.
+    Accepts customer messages from Jarallah Auto's existing website forms/chat.
+    """
+    if not DEEPSEEK_API_KEY:
+        return jsonify({'error': 'API Key not configured', 'status': 'error'}), 500
+
+    try:
+        data = request.json or {}
+        customer_msg = data.get('message', '') or data.get('text', '')
+        if not customer_msg:
+            return jsonify({'error': 'Message content is required', 'status': 'error'}), 400
+
+        from agents.marketing import handle_customer_external_chat
+        reply = handle_customer_external_chat(DEEPSEEK_API_KEY, customer_msg)
+
+        return jsonify({
+            'status': 'success',
+            'reply': reply,
+            'center': 'Jarallah Auto Center'
+        })
+    except Exception as e:
+        return jsonify({'error': str(e), 'status': 'error'}), 500
+
 @app.route('/health')
 def health():
     return jsonify({

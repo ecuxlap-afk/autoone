@@ -60,5 +60,30 @@ def consult_marketing_for_boardroom(api_key, boss_query, doctor_insight):
             record_private_memory('marketing', 'assistant', content)
             return content
         return "أتأشرف بخدمتك يا سعادة الرئيس ومتابعة رضا العملاء بناءً على توجيهاتك."
+def handle_customer_external_chat(api_key, customer_msg, history=None):
+    """
+    Handles direct customer messages arriving from the external website contact/message system.
+    Marketing Agent receives the customer query, consults Doctor Auto internally if technical,
+    and returns a polite, helpful response for Jarallah Auto Center.
+    """
+    from .doctor_auto import consult_doctor_for_boardroom
+    
+    # Check if the customer query contains technical symptoms
+    doctor_tech_input = consult_doctor_for_boardroom(api_key, f"استفسار عميل خارجي على موقع المركز: '{customer_msg}'")
+    
+    prompt = f"""أنت ممثل خدمة العملاء والتسويق في ورشة "جار الله أوتو".
+رسالة العميل القادمة من موقع المركز: '{customer_msg}'
+
+الاستشارة الفنية الداخلية من د. سيارات: '{doctor_tech_input}'
+
+المطلوب: صياغة رد احترافي، ودود، وأمين للعميل يجيبه عن استفساره، يرحب به، ويدعوه لزيارة الورشة أو حجز موعد. تواصل مباشرة مع العميل بأسلوب راقٍ دون تعقيد."""
+
+    headers = {'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'}
+    try:
+        res = requests.post(DEEPSEEK_API_URL, json={'model': 'deepseek-chat', 'messages': [{'role': 'user', 'content': prompt}], 'temperature': 0.4, 'max_tokens': 600}, headers=headers, timeout=30)
+        if res.status_code == 200:
+            return res.json()['choices'][0]['message']['content']
+        return "أهلاً بك في مركز جار الله أوتو. يسعدنا تواصلك وخدمتك فوراً."
     except Exception:
-        return "حاضر يا سعادة الرئيس، فريق التسويق والخدمة ينفذ التوجيه."
+        return "أهلاً بك في مركز جار الله أوتو. نسعد بخدمتك ومعالجة استفسارك فوراً."
+
