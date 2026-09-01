@@ -3,725 +3,1226 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>د. سيارات | خبير الصيانة والبرمجة</title>
-  <meta name="description" content="استشر د. سيارات - خبيرك الذكي المتخصص في صيانة وبرمجة السيارات. تشخيص دقيق وحلول احترافية." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+  <title>AutoVision AI | Intelligent Automotive Diagnostics</title>
+  <meta name="description" content="نظام تشخيص السيارات الذكي — تحليل دقيق ومهني لجميع أعطال السيارات" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
   <style>
+    /* ============================================================
+       DESIGN SYSTEM
+    ============================================================ */
     :root {
-      --bg-primary: #0a0a0f;
-      --bg-secondary: #0f1117;
-      --bg-card: #13151f;
-      --bg-input: #1a1d2e;
-      --accent-orange: #f97316;
-      --accent-amber: #f59e0b;
-      --accent-red: #ef4444;
-      --text-primary: #f1f5f9;
-      --text-secondary: #94a3b8;
-      --text-muted: #475569;
-      --border: #1e2235;
-      --border-glow: rgba(249, 115, 22, 0.3);
-      --user-bubble: linear-gradient(135deg, #f97316, #ea580c);
-      --bot-bubble: #16192a;
-      --shadow-glow: 0 0 30px rgba(249, 115, 22, 0.15);
+      --bg-void:       #04060d;
+      --bg-base:       #070b16;
+      --bg-surface:    #0b1222;
+      --bg-elevated:   #111b2e;
+      --bg-card:       #162032;
+      --bg-hover:      #1c2a3f;
+
+      --border-faint:  rgba(255,255,255,0.05);
+      --border-subtle: rgba(255,255,255,0.09);
+      --border-mid:    rgba(255,255,255,0.14);
+      --border-strong: rgba(255,255,255,0.22);
+
+      --accent:        #f97316;
+      --accent-warm:   #fb923c;
+      --accent-dim:    rgba(249,115,22,0.09);
+      --accent-glow:   rgba(249,115,22,0.22);
+      --accent-border: rgba(249,115,22,0.28);
+
+      --text-primary:  #e8eeff;
+      --text-sub:      #6880a8;
+      --text-muted:    #38506e;
+
+      --ok:    #34d399;
+      --warn:  #fbbf24;
+      --err:   #f87171;
+
+      --sidebar-w:   260px;
+      --header-h:    56px;
+      --r-sm:  4px;
+      --r-md:  8px;
+      --r-lg:  12px;
+      --r-xl:  16px;
+      --r-2xl: 20px;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
 
     body {
-      font-family: 'Tajawal', sans-serif;
-      background: var(--bg-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-void);
       color: var(--text-primary);
-      height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+    }
+
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 99px; }
+
+    button { cursor: pointer; }
+    textarea { font-family: inherit; }
+
+    /* ============================================================
+       APP SHELL
+    ============================================================ */
+    #app {
       display: flex;
-      flex-direction: column;
+      height: 100vh;
       overflow: hidden;
     }
 
-    /* Animated background */
-    body::before {
-      content: '';
-      position: fixed;
-      top: -50%;
-      right: -50%;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle, rgba(249,115,22,0.05) 0%, transparent 60%);
-      animation: pulse-bg 8s ease-in-out infinite;
-      pointer-events: none;
-      z-index: 0;
+    /* ============================================================
+       SIDEBAR
+    ============================================================ */
+    #sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: var(--bg-surface);
+      border-left: 1px solid var(--border-faint);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 100;
+      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
-    body::after {
-      content: '';
-      position: fixed;
-      bottom: -50%;
-      left: -50%;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle, rgba(239,68,68,0.03) 0%, transparent 60%);
-      animation: pulse-bg 10s ease-in-out infinite reverse;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    @keyframes pulse-bg {
-      0%, 100% { transform: scale(1); opacity: 0.5; }
-      50% { transform: scale(1.2); opacity: 1; }
-    }
-
-    /* ====== HEADER ====== */
-    .header {
-      position: relative;
-      z-index: 10;
-      background: rgba(10, 10, 15, 0.9);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-      padding: 0 24px;
+    /* Brand */
+    .sb-brand {
+      padding: 18px 16px;
+      border-bottom: 1px solid var(--border-faint);
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      height: 70px;
-      box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+      gap: 10px;
+      flex-shrink: 0;
     }
 
-    .header-brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
+    .sb-logo {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 16px var(--accent-glow);
     }
 
-    .logo-circle {
-      width: 46px;
-      height: 46px;
-      background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      box-shadow: 0 0 20px rgba(249,115,22,0.4);
-      animation: logo-pulse 3s ease-in-out infinite;
-    }
-
-    @keyframes logo-pulse {
-      0%, 100% { box-shadow: 0 0 20px rgba(249,115,22,0.4); }
-      50% { box-shadow: 0 0 35px rgba(249,115,22,0.7); }
-    }
-
-    .brand-text h1 {
-      font-size: 18px;
-      font-weight: 800;
+    .sb-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px; font-weight: 700;
       color: var(--text-primary);
-      line-height: 1.1;
+      letter-spacing: 0.5px;
+      direction: ltr;
+      line-height: 1;
+    }
+    .sb-name .hl { color: var(--accent); }
+    .sb-tagline {
+      font-size: 10px; color: var(--text-muted);
+      letter-spacing: 0.3px;
+      direction: ltr;
+      margin-top: 2px;
     }
 
-    .brand-text span {
-      font-size: 12px;
-      color: var(--accent-orange);
-      font-weight: 500;
+    /* New session */
+    .sb-actions { padding: 12px; flex-shrink: 0; }
+
+    .btn-new {
+      width: 100%;
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 12px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--r-md);
+      color: var(--accent);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 500;
+      transition: all 0.2s;
+      letter-spacing: 0.2px;
+    }
+    .btn-new:hover {
+      background: rgba(249,115,22,0.15);
+      border-color: var(--accent);
+      box-shadow: 0 0 20px rgba(249,115,22,0.1);
+    }
+    .btn-new svg { flex-shrink: 0; }
+
+    /* Sessions */
+    .sb-section { flex: 1; overflow-y: auto; }
+    .sb-label {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 1.3px;
+      color: var(--text-muted);
+      padding: 14px 18px 6px;
+      text-transform: uppercase;
+      direction: ltr;
     }
 
-    .status-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.2);
+    .sess-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 18px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .sess-item:hover { background: var(--bg-elevated); }
+    .sess-item.active { background: var(--accent-dim); }
+
+    .sess-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .sess-item.active .sess-dot { background: var(--accent); }
+
+    .sess-title {
+      font-size: 12.5px; color: var(--text-sub);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .sess-item.active .sess-title { color: var(--text-primary); }
+
+    /* Vehicle panel */
+    .vehicle-panel {
+      margin: 10px;
+      padding: 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-faint);
+      border-radius: var(--r-lg);
+      flex-shrink: 0;
+    }
+
+    .vp-label {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 1.2px; text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      direction: ltr;
+    }
+
+    .vp-row {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border-faint);
+      margin-bottom: 4px;
+    }
+    .vp-row:last-child { border-bottom: none; margin-bottom: 0; }
+
+    .vp-k { font-size: 11px; color: var(--text-muted); direction: ltr; }
+    .vp-v {
+      font-size: 12px; color: var(--text-sub);
+      font-family: 'JetBrains Mono', monospace;
+      direction: ltr;
+    }
+
+    /* ============================================================
+       WORKSPACE
+    ============================================================ */
+    #workspace {
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      background: var(--bg-base);
+      position: relative;
+    }
+
+    /* Subtle grid pattern */
+    #workspace::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(249,115,22,0.012) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(249,115,22,0.012) 1px, transparent 1px);
+      background-size: 56px 56px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* TOPBAR */
+    #topbar {
+      height: var(--header-h);
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      border-bottom: 1px solid var(--border-faint);
+      background: rgba(7,11,22,0.85);
+      backdrop-filter: blur(20px);
+      flex-shrink: 0;
+      position: relative; z-index: 10;
+    }
+
+    .tb-left { display: flex; align-items: center; gap: 10px; }
+
+    #menu-btn {
+      display: none;
+      width: 34px; height: 34px;
+      background: none;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--r-md);
+      color: var(--text-sub);
+      align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    #menu-btn:hover { border-color: var(--border-mid); color: var(--text-primary); }
+
+    .tb-session-info {
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .tb-badge {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 3px 8px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-faint);
       border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 13px;
-      color: #10b981;
-      font-weight: 500;
+      direction: ltr;
+    }
+
+    .tb-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px; font-weight: 500;
+      color: var(--text-sub);
+    }
+
+    .tb-right { display: flex; align-items: center; gap: 8px; }
+
+    .status-pill {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 12px;
+      background: rgba(52,211,153,0.07);
+      border: 1px solid rgba(52,211,153,0.18);
+      border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+      color: var(--ok);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      direction: ltr;
     }
 
     .status-dot {
-      width: 8px;
-      height: 8px;
-      background: #10b981;
+      width: 6px; height: 6px;
       border-radius: 50%;
-      animation: blink 2s ease-in-out infinite;
+      background: var(--ok);
+      animation: pulse-ok 2.5s ease-in-out infinite;
     }
 
-    @keyframes blink {
+    @keyframes pulse-ok {
       0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
+      50% { opacity: 0.4; }
     }
 
-    /* ====== MAIN LAYOUT ====== */
-    .main {
+    .icon-btn {
+      width: 32px; height: 32px;
+      background: none;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--r-md);
+      color: var(--text-sub);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .icon-btn:hover {
+      border-color: var(--border-mid);
+      color: var(--text-primary);
+      background: var(--bg-elevated);
+    }
+
+    /* ============================================================
+       MESSAGES
+    ============================================================ */
+    #messages {
+      flex: 1; min-height: 0;
+      overflow-y: auto;
+      position: relative; z-index: 1;
+    }
+
+    /* ============================================================
+       WELCOME STATE
+    ============================================================ */
+    #welcome {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 100%;
+      padding: 40px 28px;
+      text-align: center;
+      animation: fadein 0.6s ease;
+    }
+
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .w-eyebrow {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+      direction: ltr;
+    }
+
+    .w-headline {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(20px, 2.8vw, 30px);
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.25;
+      margin-bottom: 12px;
+      max-width: 480px;
+    }
+
+    .w-sub {
+      font-size: 14px; color: var(--text-sub);
+      max-width: 420px; line-height: 1.75;
+      margin-bottom: 36px;
+    }
+
+    /* Diagnostic category grid */
+    .diag-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%; max-width: 700px;
+      margin-bottom: 28px;
+    }
+
+    .diag-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-faint);
+      border-radius: var(--r-lg);
+      padding: 16px 14px;
+      cursor: pointer;
+      text-align: right;
+      transition: all 0.25s;
       position: relative;
-      z-index: 5;
-      flex: 1;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-      max-width: 900px;
-      margin: 0 auto;
-      width: 100%;
-      padding: 0 16px;
       overflow: hidden;
     }
 
-    /* ====== CHAT AREA ====== */
-    .chat-container {
-      flex: 1;
-      min-height: 0;
-      overflow-y: auto;
-      padding: 24px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      scroll-behavior: smooth;
+    .diag-card::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 2px; height: 0;
+      background: var(--accent);
+      transition: height 0.3s ease;
     }
 
-    .chat-container::-webkit-scrollbar {
-      width: 4px;
+    .diag-card:hover {
+      border-color: var(--border-subtle);
+      background: var(--bg-card);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.35), 0 0 0 1px rgba(249,115,22,0.08);
     }
 
-    .chat-container::-webkit-scrollbar-track {
-      background: transparent;
+    .diag-card:hover::after { height: 100%; }
+
+    .dc-icon {
+      width: 36px; height: 36px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(249,115,22,0.15);
+      border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent);
+      margin-bottom: 10px;
     }
 
-    .chat-container::-webkit-scrollbar-thumb {
-      background: var(--border);
-      border-radius: 10px;
+    .dc-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px; font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
     }
 
-    /* ====== WELCOME SCREEN ====== */
-    .welcome-screen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .dc-sub {
+      font-size: 11px; color: var(--text-muted);
+      line-height: 1.5;
+      direction: ltr;
+    }
+
+    /* Quick prompts */
+    .quick-row {
+      display: flex; flex-wrap: wrap; gap: 8px;
       justify-content: center;
-      text-align: center;
-      padding: 40px 20px;
-      gap: 24px;
-      animation: fadeInUp 0.8s ease;
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .welcome-icon {
-      width: 100px;
-      height: 100px;
-      background: linear-gradient(135deg, #1a1d2e, #0f1117);
-      border: 2px solid var(--accent-orange);
-      border-radius: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      box-shadow: var(--shadow-glow);
-      animation: float 4s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
-    .welcome-title {
-      font-size: 32px;
-      font-weight: 900;
-      background: linear-gradient(135deg, var(--accent-orange), var(--accent-amber));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .welcome-subtitle {
-      font-size: 16px;
-      color: var(--text-secondary);
-      max-width: 400px;
-      line-height: 1.7;
-    }
-
-    .quick-questions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      width: 100%;
       max-width: 600px;
     }
 
-    .quick-btn {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px 16px;
-      color: var(--text-secondary);
-      font-family: 'Tajawal', sans-serif;
-      font-size: 14px;
-      cursor: pointer;
-      text-align: right;
-      transition: all 0.3s ease;
-      line-height: 1.5;
-    }
-
-    .quick-btn:hover {
-      border-color: var(--accent-orange);
-      color: var(--text-primary);
-      background: rgba(249, 115, 22, 0.08);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(249,115,22,0.1);
-    }
-
-    .quick-btn .q-icon {
-      font-size: 18px;
-      display: block;
-      margin-bottom: 6px;
-    }
-
-    /* ====== MESSAGES ====== */
-    .message {
-      display: flex;
-      gap: 12px;
-      animation: messageIn 0.4s ease;
-    }
-
-    @keyframes messageIn {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .message.user {
-      flex-direction: row-reverse;
-    }
-
-    .avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      flex-shrink: 0;
-      margin-top: 4px;
-    }
-
-    .message.bot .avatar {
-      background: linear-gradient(135deg, #1a1d2e, #0f1117);
-      border: 1px solid var(--accent-orange);
-    }
-
-    .message.user .avatar {
-      background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
-    }
-
-    .bubble {
-      max-width: 75%;
-      padding: 14px 18px;
-      border-radius: 18px;
-      line-height: 1.8;
-      font-size: 15px;
-    }
-
-    .message.bot .bubble {
-      background: var(--bot-bubble);
-      border: 1px solid var(--border);
-      border-radius: 4px 18px 18px 18px;
-      color: var(--text-primary);
-    }
-
-    .message.user .bubble {
-      background: var(--user-bubble);
-      border-radius: 18px 4px 18px 18px;
-      color: white;
-      font-weight: 500;
-    }
-
-    /* Typing indicator */
-    .typing-indicator {
-      display: flex;
-      gap: 5px;
-      padding: 16px 18px;
-      background: var(--bot-bubble);
-      border: 1px solid var(--border);
-      border-radius: 4px 18px 18px 18px;
-      width: fit-content;
-    }
-
-    .typing-dot {
-      width: 8px;
-      height: 8px;
-      background: var(--accent-orange);
-      border-radius: 50%;
-      animation: typingBounce 1.4s ease-in-out infinite;
-    }
-
-    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes typingBounce {
-      0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-      30% { transform: translateY(-8px); opacity: 1; }
-    }
-
-    /* ====== INPUT AREA ====== */
-    .input-area {
-      padding: 16px 0 24px;
-      position: relative;
-    }
-
-    .input-wrapper {
-      display: flex;
-      align-items: flex-end;
-      gap: 10px;
-      background: var(--bg-input);
-      border: 1px solid var(--border);
+    .q-chip {
+      padding: 6px 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
       border-radius: 20px;
-      padding: 12px 16px;
-      transition: all 0.3s ease;
-    }
-
-    .input-wrapper:focus-within {
-      border-color: var(--accent-orange);
-      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
-    }
-
-    #userInput {
-      flex: 1;
-      background: none;
-      border: none;
-      outline: none;
-      color: var(--text-primary);
-      font-family: 'Tajawal', sans-serif;
-      font-size: 15px;
-      resize: none;
-      max-height: 120px;
-      min-height: 24px;
-      line-height: 1.6;
-      direction: rtl;
-    }
-
-    #userInput::placeholder {
-      color: var(--text-muted);
-    }
-
-    #sendBtn {
-      width: 42px;
-      height: 42px;
-      background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
-      border: none;
-      border-radius: 12px;
+      font-size: 12px; color: var(--text-sub);
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-      flex-shrink: 0;
-      box-shadow: 0 4px 15px rgba(249,115,22,0.3);
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .q-chip:hover {
+      border-color: var(--accent-border);
+      color: var(--text-primary);
+      background: var(--accent-dim);
     }
 
-    #sendBtn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 6px 20px rgba(249,115,22,0.5);
+    /* ============================================================
+       MESSAGE FEED
+    ============================================================ */
+    .msg-wrap {
+      padding: 6px 22px;
+      animation: msgIn 0.3s ease;
     }
 
-    #sendBtn:active {
-      transform: scale(0.95);
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
-    #sendBtn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    #sendBtn svg {
-      width: 20px;
-      height: 20px;
-      fill: white;
-    }
-
-    .input-hint {
-      text-align: center;
+    /* Separator */
+    .msg-sep {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 22px;
       color: var(--text-muted);
+      font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+      direction: ltr;
+    }
+    .msg-sep::before, .msg-sep::after {
+      content: ''; flex: 1;
+      height: 1px; background: var(--border-faint);
+    }
+
+    /* USER bubble */
+    .msg-user {
+      display: flex; justify-content: flex-end;
+      align-items: flex-end; gap: 8px;
+    }
+
+    .user-avatar {
+      width: 26px; height: 26px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      color: var(--text-muted);
+    }
+
+    .user-bubble {
+      max-width: 62%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--r-xl) var(--r-sm) var(--r-xl) var(--r-xl);
+      padding: 11px 15px;
+      font-size: 14px; color: var(--text-primary);
+      line-height: 1.65;
+    }
+
+    /* AI diagnostic panel */
+    .msg-ai {
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+
+    .ai-avatar {
+      width: 26px; height: 26px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      color: var(--accent);
+      margin-top: 12px;
+    }
+
+    .diag-panel {
+      flex: 1; min-width: 0;
+      max-width: calc(100% - 36px);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-faint);
+      border-radius: var(--r-sm) var(--r-xl) var(--r-xl) var(--r-xl);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border-faint);
+      background: rgba(249,115,22,0.04);
+    }
+
+    .panel-type {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 9.5px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--accent);
+      direction: ltr;
+    }
+
+    .panel-divider {
+      width: 1px; height: 12px;
+      background: var(--border-faint);
+    }
+
+    .panel-time {
+      font-size: 10px; color: var(--text-muted);
+      direction: ltr; margin-right: auto;
+    }
+
+    .panel-body {
+      padding: 14px 16px;
+      font-size: 14px; color: var(--text-primary);
+      line-height: 1.8;
+    }
+
+    .panel-body strong { color: var(--accent-warm); font-weight: 600; }
+
+    .panel-body code {
+      font-family: 'JetBrains Mono', monospace;
       font-size: 12px;
-      margin-top: 10px;
-    }
-
-    /* ====== ERROR MESSAGE ====== */
-    .error-bubble {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      border-radius: 12px;
-      padding: 12px 16px;
-      color: #fca5a5;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* Formatted bot response */
-    .bubble strong {
-      color: var(--accent-amber);
-    }
-
-    .bubble code {
       background: rgba(249,115,22,0.1);
+      color: var(--accent-warm);
       padding: 2px 6px;
-      border-radius: 4px;
-      font-family: monospace;
-      color: var(--accent-orange);
-      font-size: 13px;
+      border-radius: var(--r-sm);
+      direction: ltr;
+      display: inline-block;
     }
 
-    /* Responsive */
-    @media (max-width: 600px) {
-      .quick-questions {
-        grid-template-columns: 1fr;
+    /* Typing */
+    .typing-wrap { padding: 6px 22px; }
+
+    .typing-row {
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+
+    .typing-dots {
+      display: flex; gap: 4px;
+      padding: 13px 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-faint);
+      border-radius: var(--r-sm) var(--r-xl) var(--r-xl) var(--r-xl);
+    }
+
+    .td {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.35;
+      animation: tdot 1.4s ease-in-out infinite;
+    }
+    .td:nth-child(2) { animation-delay: 0.18s; }
+    .td:nth-child(3) { animation-delay: 0.36s; }
+
+    @keyframes tdot {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
+      30% { transform: translateY(-5px); opacity: 1; }
+    }
+
+    /* Error */
+    .err-msg {
+      margin: 6px 22px;
+      padding: 11px 15px;
+      background: rgba(248,113,113,0.06);
+      border: 1px solid rgba(248,113,113,0.18);
+      border-radius: var(--r-md);
+      font-size: 13px; color: var(--err);
+    }
+
+    /* ============================================================
+       INPUT ZONE
+    ============================================================ */
+    #input-zone {
+      padding: 12px 20px 16px;
+      background: rgba(7,11,22,0.94);
+      backdrop-filter: blur(24px);
+      border-top: 1px solid var(--border-faint);
+      flex-shrink: 0;
+      position: relative; z-index: 10;
+    }
+
+    .input-inner { max-width: 820px; margin: 0 auto; }
+
+    .input-box {
+      display: flex; align-items: flex-end; gap: 10px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--r-2xl);
+      padding: 10px 10px 10px 12px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-box:focus-within {
+      border-color: rgba(249,115,22,0.38);
+      box-shadow: 0 0 0 3px rgba(249,115,22,0.06);
+    }
+
+    #msg-input {
+      flex: 1;
+      background: none; border: none; outline: none;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px; line-height: 1.6;
+      resize: none;
+      min-height: 22px; max-height: 120px;
+      direction: rtl;
+      padding: 2px 2px;
+    }
+    #msg-input::placeholder { color: var(--text-muted); }
+
+    #send-btn {
+      width: 38px; height: 38px;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--r-lg);
+      color: white;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(249,115,22,0.3);
+    }
+    #send-btn:hover { background: var(--accent-warm); transform: scale(1.04); box-shadow: 0 4px 24px rgba(249,115,22,0.45); }
+    #send-btn:active { transform: scale(0.96); }
+    #send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .input-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 6px 4px 0;
+      font-size: 11px; color: var(--text-muted);
+      direction: ltr;
+    }
+
+    /* ============================================================
+       MOBILE OVERLAY
+    ============================================================ */
+    #overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(3px);
+      z-index: 90;
+    }
+    #overlay.on { display: block; }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (max-width: 820px) {
+      #sidebar {
+        position: fixed;
+        top: 0; right: 0;
+        height: 100%;
+        width: min(280px, 82vw);
+        transform: translateX(110%);
+        border-left: none;
+        border-right: 1px solid var(--border-faint);
+        box-shadow: none;
+        z-index: 100;
       }
-      .bubble {
-        max-width: 88%;
+      #sidebar.open {
+        transform: translateX(0);
+        box-shadow: -24px 0 80px rgba(0,0,0,0.6);
       }
-      .welcome-title {
-        font-size: 24px;
-      }
+      #menu-btn { display: flex; }
+
+      .diag-grid { grid-template-columns: repeat(2, 1fr); }
+      .quick-row { display: none; }
+      #welcome { padding: 24px 16px; }
+      .msg-wrap { padding: 5px 14px; }
+      .typing-wrap { padding: 5px 14px; }
+      .err-msg { margin: 5px 14px; }
+      .msg-sep { padding: 10px 14px; }
+      .user-bubble { max-width: 80%; }
+      #input-zone { padding: 10px 12px 14px; }
+    }
+
+    @media (max-width: 480px) {
+      .diag-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .diag-card { padding: 12px 10px; }
+      .dc-icon { width: 30px; height: 30px; }
+      .dc-title { font-size: 12px; }
+      .dc-sub { display: none; }
+      .w-headline { font-size: 18px; }
+      .w-sub { font-size: 13px; }
+      .user-bubble { max-width: 86%; font-size: 13px; }
+      .panel-body { font-size: 13px; }
+      .status-pill span { display: none; }
+    }
+
+    /* Slide-in animation for sidebar */
+    @keyframes slideIn {
+      from { transform: translateX(110%); }
+      to   { transform: translateX(0); }
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
-  <header class="header">
-    <div class="header-brand">
-      <div class="logo-circle">🔧</div>
-      <div class="brand-text">
-        <h1>د. سيارات</h1>
-        <span>خبير الصيانة والبرمجة</span>
+<div id="app">
+
+  <!-- ============================================================
+       SIDEBAR
+  ============================================================ -->
+  <aside id="sidebar">
+
+    <div class="sb-brand">
+      <div class="sb-logo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+        </svg>
+      </div>
+      <div>
+        <div class="sb-name">AUTO<span class="hl">VISION</span> AI</div>
+        <div class="sb-tagline">Automotive Diagnostic System</div>
       </div>
     </div>
-    <div class="status-badge">
-      <div class="status-dot"></div>
-      متصل الآن
+
+    <div class="sb-actions">
+      <button class="btn-new" onclick="newSession()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        جلسة تشخيص جديدة
+      </button>
     </div>
-  </header>
 
-  <!-- MAIN -->
-  <main class="main">
-    <div class="chat-container" id="chatContainer">
-
-      <!-- WELCOME -->
-      <div class="welcome-screen" id="welcomeScreen">
-        <div class="welcome-icon">🚗</div>
-        <div>
-          <h2 class="welcome-title">مرحباً بك مع د. سيارات</h2>
-          <p class="welcome-subtitle">
-            خبيرك الذكي في تشخيص وصيانة وبرمجة السيارات.<br>
-            اسألني عن أي عطل أو استفسار تقني!
-          </p>
-        </div>
-
-        <div class="quick-questions">
-          <button class="quick-btn" onclick="sendQuick(this)">
-            <span class="q-icon">⚠️</span>
-            إضاءة Check Engine لا تطفأ، ما السبب؟
-          </button>
-          <button class="quick-btn" onclick="sendQuick(this)">
-            <span class="q-icon">🔋</span>
-            البطارية تفرغ بسرعة، هل المشكلة في الـ Alternator؟
-          </button>
-          <button class="quick-btn" onclick="sendQuick(this)">
-            <span class="q-icon">💨</span>
-            السيارة تهتز عند التسارع، ما سبب المشكلة؟
-          </button>
-          <button class="quick-btn" onclick="sendQuick(this)">
-            <span class="q-icon">🌡️</span>
-            الـ ECU يعطي كود P0300 ماذا يعني؟
-          </button>
-        </div>
+    <div class="sb-section">
+      <div class="sb-label">RECENT SESSIONS</div>
+      <div class="sess-item active">
+        <div class="sess-dot"></div>
+        <div class="sess-title">الجلسة الحالية</div>
       </div>
-
     </div>
 
-    <!-- INPUT -->
-    <div class="input-area">
-      <div class="input-wrapper">
-        <button id="sendBtn" onclick="sendMessage()" title="إرسال">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+    <div class="vehicle-panel">
+      <div class="vp-label">VEHICLE PROFILE</div>
+      <div class="vp-row">
+        <span class="vp-k">Make</span>
+        <span class="vp-v" id="v-make">—</span>
+      </div>
+      <div class="vp-row">
+        <span class="vp-k">Model</span>
+        <span class="vp-v" id="v-model">—</span>
+      </div>
+      <div class="vp-row">
+        <span class="vp-k">Year</span>
+        <span class="vp-v" id="v-year">—</span>
+      </div>
+    </div>
+
+  </aside>
+
+  <div id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- ============================================================
+       WORKSPACE
+  ============================================================ -->
+  <main id="workspace">
+
+    <!-- TOPBAR -->
+    <div id="topbar">
+      <div class="tb-left">
+        <button id="menu-btn" onclick="toggleSidebar()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
           </svg>
         </button>
-        <textarea
-          id="userInput"
-          placeholder="اسألني عن أي عطل أو مشكلة في سيارتك..."
-          rows="1"
-          onkeydown="handleKeyDown(event)"
-          oninput="autoResize(this)"
-        ></textarea>
+        <div class="tb-session-info">
+          <span class="tb-badge">AutoVision AI</span>
+          <span class="tb-title" id="session-title">جلسة تشخيص جديدة</span>
+        </div>
       </div>
-      <p class="input-hint">اضغط Enter للإرسال • Shift+Enter لسطر جديد</p>
+      <div class="tb-right">
+        <div class="status-pill">
+          <div class="status-dot"></div>
+          <span>SYSTEM READY</span>
+        </div>
+        <button class="icon-btn" onclick="newSession()" title="جلسة جديدة">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+      </div>
     </div>
-  </main>
 
-  <script>
-    let conversationHistory = [];
-    let isLoading = false;
+    <!-- MESSAGES -->
+    <div id="messages">
 
-    const chatContainer = document.getElementById('chatContainer');
-    const userInput = document.getElementById('userInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const welcomeScreen = document.getElementById('welcomeScreen');
+      <!-- WELCOME STATE -->
+      <div id="welcome">
+        <div class="w-eyebrow">INTELLIGENT AUTOMOTIVE AI</div>
+        <h1 class="w-headline">نظام تشخيص السيارات المتقدم</h1>
+        <p class="w-sub">
+          صف العطل أو المشكلة وسيقوم النظام بتحليل الأعراض وتقديم تشخيص دقيق خطوة بخطوة باستخدام تقنيات الذكاء الاصطناعي.
+        </p>
 
-    function autoResize(textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
-    }
+        <div class="diag-grid">
 
-    function handleKeyDown(e) {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
-    }
+          <div class="diag-card" onclick="startCategory('المحرك والأداء — Check Engine، misfire، اهتزاز، أكواد ECU')">
+            <div class="dc-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+              </svg>
+            </div>
+            <div class="dc-title">المحرك والأداء</div>
+            <div class="dc-sub">Check Engine · ECU · Misfire</div>
+          </div>
 
-    function sendQuick(btn) {
-      const text = btn.innerText.trim().replace(/^[^\w\u0600-\u06FF]+/, '').trim();
-      userInput.value = text;
+          <div class="diag-card" onclick="startCategory('الأنظمة الكهربائية — بطارية، Alternator، أسلاك، حساسات')">
+            <div class="dc-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+              </svg>
+            </div>
+            <div class="dc-title">الأنظمة الكهربائية</div>
+            <div class="dc-sub">Battery · Alternator · Sensors</div>
+          </div>
+
+          <div class="diag-card" onclick="startCategory('ناقل الحركة Transmission — تأخر تعشيق، CVT، Differential، Gearbox')">
+            <div class="dc-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v8M8 12h8"/>
+              </svg>
+            </div>
+            <div class="dc-title">ناقل الحركة</div>
+            <div class="dc-sub">Transmission · CVT · Gearbox</div>
+          </div>
+
+          <div class="diag-card" onclick="startCategory('الفرامل والسلامة — ABS، ESP، Brake Pads، تحكم')">
+            <div class="dc-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </div>
+            <div class="dc-title">الفرامل والسلامة</div>
+            <div class="dc-sub">ABS · ESP · Brake System</div>
+          </div>
+
+          <div class="diag-card" onclick="startCategory('أكواد OBD-II — اشرح كود العطل DTC وإجراءات الإصلاح')">
+            <div class="dc-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2"/>
+                <path d="M8 21h8M12 17v4"/>
+                <path d="M8 9l2 2 4-4"/>
+              </svg>
+            </div>
+            <div class="dc-title">تشخيص OBD-II</div>
+            <div class="dc-sub">DTC Codes · Scanner · Reset</div>
+          </div>
+
+          <div class="diag-card" onclick="startCategory('نظام التبريد والتكييف — AC، Compressor، Radiator، سخونة المحرك')">
+            <div class="dc-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v20M4.93 4.93l14.14 14.14M2 12h20M4.93 19.07l14.14-14.14"/>
+              </svg>
+            </div>
+            <div class="dc-title">التبريد والتكييف</div>
+            <div class="dc-sub">AC · Cooling · Radiator</div>
+          </div>
+
+        </div>
+
+        <div class="quick-row">
+          <div class="q-chip" onclick="sendQuick(this)">ضوء Check Engine مضيء</div>
+          <div class="q-chip" onclick="sendQuick(this)">البطارية تفرغ بسرعة</div>
+          <div class="q-chip" onclick="sendQuick(this)">كود P0300 ماذا يعني؟</div>
+          <div class="q-chip" onclick="sendQuick(this)">اهتزاز عند التسارع</div>
+          <div class="q-chip" onclick="sendQuick(this)">تأخر في نقل السرعات</div>
+        </div>
+      </div>
+
+    </div><!-- /messages -->
+
+    <!-- INPUT ZONE -->
+    <div id="input-zone">
+      <div class="input-inner">
+        <div class="input-box">
+          <button id="send-btn" onclick="sendMessage()" title="إرسال">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="white">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
+          </button>
+          <textarea
+            id="msg-input"
+            placeholder="صف العطل أو المشكلة في سيارتك..."
+            rows="1"
+            onkeydown="handleKey(event)"
+            oninput="resizeInput(this)"
+          ></textarea>
+        </div>
+        <div class="input-meta">
+          <span>Enter للإرسال &nbsp;·&nbsp; Shift+Enter لسطر جديد</span>
+          <span id="char-count"></span>
+        </div>
+      </div>
+    </div>
+
+  </main><!-- /workspace -->
+
+</div><!-- /app -->
+
+<script>
+  /* =============================================================
+     STATE
+  ============================================================= */
+  let history   = [];
+  let loading   = false;
+  let msgCount  = 0;
+
+  const $messages  = document.getElementById('messages');
+  const $welcome   = document.getElementById('welcome');
+  const $input     = document.getElementById('msg-input');
+  const $send      = document.getElementById('send-btn');
+  const $sidebar   = document.getElementById('sidebar');
+  const $overlay   = document.getElementById('overlay');
+  const $sessTitle = document.getElementById('session-title');
+  const $charCount = document.getElementById('char-count');
+
+  /* =============================================================
+     SIDEBAR
+  ============================================================= */
+  function toggleSidebar() {
+    $sidebar.classList.toggle('open');
+    $overlay.classList.toggle('on');
+  }
+  function closeSidebar() {
+    $sidebar.classList.remove('open');
+    $overlay.classList.remove('on');
+  }
+
+  /* =============================================================
+     SESSION
+  ============================================================= */
+  function newSession() {
+    history  = [];
+    msgCount = 0;
+    loading  = false;
+    $send.disabled = false;
+
+    // Clear messages except welcome
+    const msgs = $messages.querySelectorAll(
+      '.msg-wrap, .typing-wrap, .err-msg, .msg-sep'
+    );
+    msgs.forEach(el => el.remove());
+
+    $welcome.style.display = 'flex';
+    $sessTitle.textContent = 'جلسة تشخيص جديدة';
+    $input.value = '';
+    resizeInput($input);
+    $input.focus();
+    closeSidebar();
+  }
+
+  /* =============================================================
+     WELCOME ACTIONS
+  ============================================================= */
+  function startCategory(text) {
+    $input.value = text;
+    sendMessage();
+  }
+
+  function sendQuick(el) {
+    $input.value = el.textContent.trim();
+    sendMessage();
+  }
+
+  /* =============================================================
+     INPUT RESIZE
+  ============================================================= */
+  function resizeInput(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+    const len = el.value.length;
+    $charCount.textContent = len > 20 ? len + ' / 1000' : '';
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
       sendMessage();
     }
+  }
 
-    function hideWelcome() {
-      if (welcomeScreen) {
-        welcomeScreen.style.display = 'none';
-      }
-    }
+  /* =============================================================
+     MESSAGING
+  ============================================================= */
+  function hideWelcome() {
+    if ($welcome) $welcome.style.display = 'none';
+  }
 
-    function addMessage(role, content) {
-      hideWelcome();
+  function addSep() {
+    const el = document.createElement('div');
+    el.className = 'msg-sep';
+    el.textContent = 'DIAGNOSTIC SESSION STARTED';
+    $messages.appendChild(el);
+  }
 
-      const msgDiv = document.createElement('div');
-      msgDiv.className = `message ${role}`;
+  function addUser(text) {
+    hideWelcome();
+    if (msgCount === 0) addSep();
 
-      const avatar = document.createElement('div');
-      avatar.className = 'avatar';
-      avatar.textContent = role === 'user' ? '👤' : '🔧';
+    const wrap = document.createElement('div');
+    wrap.className = 'msg-wrap';
+    wrap.innerHTML = `
+      <div class="msg-user">
+        <div class="user-bubble">${escHtml(text).replace(/\n/g,'<br>')}</div>
+        <div class="user-avatar">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+      </div>`;
+    $messages.appendChild(wrap);
+    msgCount++;
+    scrollBottom();
+  }
 
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble';
-      bubble.innerHTML = formatMessage(content);
+  function addAI(text) {
+    const now = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    const wrap = document.createElement('div');
+    wrap.className = 'msg-wrap';
+    wrap.innerHTML = `
+      <div class="msg-ai">
+        <div class="ai-avatar">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+          </svg>
+        </div>
+        <div class="diag-panel">
+          <div class="panel-header">
+            <span class="panel-type">DIAGNOSTIC ANALYSIS</span>
+            <div class="panel-divider"></div>
+            <span class="panel-time">${now}</span>
+          </div>
+          <div class="panel-body">${formatAI(text)}</div>
+        </div>
+      </div>`;
+    $messages.appendChild(wrap);
+    scrollBottom();
+  }
 
-      msgDiv.appendChild(avatar);
-      msgDiv.appendChild(bubble);
-      chatContainer.appendChild(msgDiv);
-      scrollToBottom();
-      return msgDiv;
-    }
+  function addTyping() {
+    hideWelcome();
+    const el = document.createElement('div');
+    el.className = 'typing-wrap';
+    el.id = 'typing-indicator';
+    el.innerHTML = `
+      <div class="typing-row">
+        <div class="ai-avatar" style="margin-top:0">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+          </svg>
+        </div>
+        <div class="typing-dots">
+          <div class="td"></div><div class="td"></div><div class="td"></div>
+        </div>
+      </div>`;
+    $messages.appendChild(el);
+    scrollBottom();
+  }
 
-    function formatMessage(text) {
-      // Format code-like terms in orange
-      text = text.replace(/\b([A-Z][A-Z0-9\-]{1,20})\b/g, '<code>$1</code>');
-      // Bold Arabic emphasis
-      text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      // Newlines
-      text = text.replace(/\n/g, '<br>');
-      return text;
-    }
+  function removeTyping() {
+    const el = document.getElementById('typing-indicator');
+    if (el) el.remove();
+  }
 
-    function addTypingIndicator() {
-      hideWelcome();
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'message bot';
-      msgDiv.id = 'typingIndicator';
+  function addError(msg) {
+    const el = document.createElement('div');
+    el.className = 'err-msg';
+    el.textContent = msg;
+    $messages.appendChild(el);
+    scrollBottom();
+  }
 
-      const avatar = document.createElement('div');
-      avatar.className = 'avatar';
-      avatar.textContent = '🔧';
+  /* =============================================================
+     FORMAT
+  ============================================================= */
+  function escHtml(t) {
+    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
 
-      const indicator = document.createElement('div');
-      indicator.className = 'typing-indicator';
-      indicator.innerHTML = `
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
-      `;
-
-      msgDiv.appendChild(avatar);
-      msgDiv.appendChild(indicator);
-      chatContainer.appendChild(msgDiv);
-      scrollToBottom();
-    }
-
-    function removeTypingIndicator() {
-      const indicator = document.getElementById('typingIndicator');
-      if (indicator) indicator.remove();
-    }
-
-    function scrollToBottom() {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-
-    async function sendMessage() {
-      if (isLoading) return;
-
-      const text = userInput.value.trim();
-      if (!text) return;
-
-      // Clear input
-      userInput.value = '';
-      userInput.style.height = 'auto';
-
-      // Add user message
-      addMessage('user', text);
-      conversationHistory.push({ role: 'user', content: text });
-
-      // Show typing
-      isLoading = true;
-      sendBtn.disabled = true;
-      addTypingIndicator();
-
-      try {
-        const response = await fetch('/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: conversationHistory })
-        });
-
-        const data = await response.json();
-        removeTypingIndicator();
-
-        if (data.status === 'success' && data.reply) {
-          addMessage('bot', data.reply);
-          conversationHistory.push({ role: 'assistant', content: data.reply });
-        } else {
-          showError(data.error || 'حدث خطأ في الاتصال');
-        }
-
-      } catch (err) {
-        removeTypingIndicator();
-        showError('تعذّر الاتصال بالخادم. تحقق من الإنترنت.');
-      } finally {
-        isLoading = false;
-        sendBtn.disabled = false;
-        userInput.focus();
-      }
-    }
-
-    function showError(msg) {
-      const errDiv = document.createElement('div');
-      errDiv.className = 'error-bubble';
-      errDiv.innerHTML = `⚠️ ${msg}`;
-      chatContainer.appendChild(errDiv);
-      scrollToBottom();
-    }
-
-    // Focus on load
-    window.addEventListener('load', () => {
-      userInput.focus();
+  function formatAI(text) {
+    let t = escHtml(text);
+    // Code spans like P0300, ECU etc.
+    t = t.replace(/\b([A-Z][A-Z0-9\-]{1,20})\b/g, (m) => {
+      // avoid wrapping already-tagged stuff
+      return `<code>${m}</code>`;
     });
-  </script>
+    // Bold **text**
+    t = t.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // Newlines
+    t = t.replace(/\n/g, '<br>');
+    return t;
+  }
+
+  /* =============================================================
+     SCROLL
+  ============================================================= */
+  function scrollBottom() {
+    $messages.scrollTop = $messages.scrollHeight;
+  }
+
+  /* =============================================================
+     SEND
+  ============================================================= */
+  async function sendMessage() {
+    if (loading) return;
+
+    const text = $input.value.trim();
+    if (!text) return;
+
+    $input.value = '';
+    resizeInput($input);
+
+    addUser(text);
+    history.push({ role: 'user', content: text });
+
+    // Update session title
+    if (msgCount === 1) {
+      $sessTitle.textContent = text.slice(0, 40) + (text.length > 40 ? '…' : '');
+    }
+
+    loading = true;
+    $send.disabled = true;
+    addTyping();
+
+    try {
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history })
+      });
+
+      const data = await res.json();
+      removeTyping();
+
+      if (data.status === 'success' && data.reply) {
+        addAI(data.reply);
+        history.push({ role: 'assistant', content: data.reply });
+      } else {
+        addError(data.error || 'حدث خطأ في الاتصال بالنظام');
+      }
+    } catch (err) {
+      removeTyping();
+      addError('تعذّر الاتصال بالخادم. تحقق من اتصالك بالإنترنت.');
+    } finally {
+      loading = false;
+      $send.disabled = false;
+      $input.focus();
+    }
+  }
+
+  /* =============================================================
+     INIT
+  ============================================================= */
+  window.addEventListener('load', () => $input.focus());
+</script>
 
 </body>
 </html>
