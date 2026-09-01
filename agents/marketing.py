@@ -142,14 +142,20 @@ def consult_marketing_for_boardroom(api_key, boss_query, doctor_insight):
 def handle_customer_external_chat(api_key, customer_msg, history=None):
     """
     Handles direct customer messages arriving from the website chat widget.
-    Consults Doctor Auto internally for technical insight, maintains full conversation history context,
-    and returns a polite, accurate response following Jarallah's official pricing & negotiation policy.
+    Consults Doctor Auto internally only when technical symptoms/queries are present,
+    maintains full conversation history context,
+    and returns a polite, accurate response following official pricing & negotiation policy.
     """
     from .doctor_auto import consult_doctor_for_boardroom
-    
-    # Check if the customer query contains technical symptoms
-    doctor_tech_input = consult_doctor_for_boardroom(api_key, f"استفسار عميل خارجي على موقع مركز برق الجزيرة: '{customer_msg}'")
-    
+
+    # Check if technical consultation is needed
+    tech_keywords = ['عطل', 'مشكلة', 'تفتفة', 'حرارة', 'صوت', 'لمبة', 'نتعة', 'تقطيع', 'دخان', 'ظفيرة', 'كمبيوتر', 'DOD', 'مراوح', 'تكييف', 'بخاخات', 'فحص']
+    is_technical_query = any(kw in customer_msg for kw in tech_keywords)
+
+    doctor_tech_input = ""
+    if is_technical_query:
+        doctor_tech_input = consult_doctor_for_boardroom(api_key, f"استفسار عميل خارجي على موقع مركز برق الجزيرة: '{customer_msg}'")
+
     deepseek_msgs = [{'role': 'system', 'content': MARKETING_SYSTEM_PROMPT}]
 
     # Append previous history if available (up to last 8 turns)
@@ -162,18 +168,31 @@ def handle_customer_external_chat(api_key, customer_msg, history=None):
                     deepseek_msgs.append({'role': r, 'content': c})
 
     # Prepare current turn prompt
-    current_prompt = f"""رسالة العميل الحالية: '{customer_msg}'
+    if doctor_tech_input:
+        current_prompt = f"""رسالة العميل الحالية: '{customer_msg}'
 (استشارة فنية مساعدة من د. سيارات: '{doctor_tech_input}')
 
-المطلوب: صياغة الرد المناسب استكمالاً للمحادثة بدقة وأمانة.
-⚠️ تنبيه صارم للتسعير: اذكر السعر الأساسي الرسمي فقط! ممنوع منعاً باتاً ذكر إمكانية التخفيض أو الحد الأدنى أو كلمة خصم إلا إذا طلب العميل ذلك صراحة في رسالته!
+المطلوب: صياغة الرد التسويقي المناسب باستكمال المحادثة بدقة وأمانة وإيجاز مباشر.
+⚠️ تنبيهات حاسمة وواجبة الالتزام:
+1. اذكر السعر الأساسي الرسمي فقط! ممنوع قاطعاً ذكر أي خصم أو سعر أدنى أو كلمة تخفيض إلا إذا طلب العميل ذلك صراحة في رسالته!
+2. التنبيه الميكانيكي (التكايات والقطع) خاص حصراً وخاص جداً بإلغاء نظام DOD! يُمنع منعاً باتاً ذكره في برمجة المراوح أو الفحص أو الخدمات الأخرى!
+3. مدة خدمات البرمجة والفحص هي (15 إلى 30 دقيقة فقط)، يمنع قاطعاً إيهام العميل أنها تستغرق يوماً كاملاً أو الاستلام غداً!
+المركز: مركز برق الجزيرة (تحت إشراف الفني جارالله - 0534669518 - صناعية أبها)."""
+    else:
+        current_prompt = f"""رسالة العميل الحالية: '{customer_msg}'
+
+المطلوب: صياغة الرد التسويقي المناسب باستكمال المحادثة بدقة وأمانة وإيجاز مباشر.
+⚠️ تنبيهات حاسمة وواجبة الالتزام:
+1. اذكر السعر الأساسي الرسمي فقط! ممنوع قاطعاً ذكر أي خصم أو سعر أدنى أو كلمة تخفيض إلا إذا طلب العميل ذلك صراحة في رسالته!
+2. التنبيه الميكانيكي (التكايات والقطع) خاص حصراً وخاص جداً بإلغاء نظام DOD! يُمنع منعاً باتاً ذكره في برمجة المراوح أو الفحص أو الخدمات الأخرى!
+3. مدة خدمات البرمجة والفحص هي (15 إلى 30 دقيقة فقط)، يمنع قاطعاً إيهام العميل أنها تستغرق يوماً كاملاً أو الاستلام غداً!
 المركز: مركز برق الجزيرة (تحت إشراف الفني جارالله - 0534669518 - صناعية أبها)."""
 
     deepseek_msgs.append({'role': 'user', 'content': current_prompt})
 
     headers = {'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'}
     try:
-        res = requests.post(DEEPSEEK_API_URL, json={'model': 'deepseek-chat', 'messages': deepseek_msgs, 'temperature': 0.4, 'max_tokens': 600}, headers=headers, timeout=30)
+        res = requests.post(DEEPSEEK_API_URL, json={'model': 'deepseek-chat', 'messages': deepseek_msgs, 'temperature': 0.3, 'max_tokens': 600}, headers=headers, timeout=30)
         if res.status_code == 200:
             return res.json()['choices'][0]['message']['content']
         return "أهلاً بك في مركز برق الجزيرة. يسعدنا تواصلك وخدمتك فوراً."
