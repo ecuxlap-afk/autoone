@@ -23,17 +23,29 @@ def chat():
     try:
         data = request.json or {}
         messages = data.get('messages', [])
-        room = data.get('room', 'boardroom') # Default to Boardroom meeting with Boss
+        room = data.get('room', 'boardroom')
 
         # Execute HQ Office / Boardroom Meeting Chat
         reply = handle_hq_room_chat(DEEPSEEK_API_KEY, room, messages)
 
-        return jsonify({
-            'reply': reply,
-            'status': 'success',
-            'room': room,
-            'system_type': 'AutoOne Enterprise Virtual HQ'
-        })
+        if isinstance(reply, list):
+            # Boardroom multi-agent separate responses
+            return jsonify({
+                'status': 'success',
+                'room': room,
+                'is_multi': True,
+                'agent_replies': reply,
+                'system_type': 'AutoOne Enterprise Boardroom'
+            })
+        else:
+            # Single office response
+            return jsonify({
+                'status': 'success',
+                'room': room,
+                'is_multi': False,
+                'reply': reply,
+                'system_type': 'AutoOne Private Office'
+            })
 
     except Exception as e:
         return jsonify({
@@ -46,14 +58,7 @@ def health():
     return jsonify({
         'status': 'ok',
         'system': 'AutoOne Enterprise Virtual HQ',
-        'api_key_set': bool(DEEPSEEK_API_KEY),
-        'headquarters_rooms': [
-            'Executive Boardroom (غرفة الاجتماعات الجماعية)',
-            'Chief Orchestrator Private Office (مكتب المشرف العام)',
-            'Doctor Auto Technical Office (مكتب دكتور السيارات)',
-            'Marketing & Customer Service Office (مكتب التسويق والعملاء)',
-            'Operations & Booking Office (مكتب المواعيد والعمليات)'
-        ]
+        'api_key_set': bool(DEEPSEEK_API_KEY)
     })
 
 if __name__ == '__main__':

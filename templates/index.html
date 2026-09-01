@@ -10,9 +10,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 
   <style>
-    /* ============================================================
-       DESIGN SYSTEM - ENTERPRISE VIRTUAL HQ
-    ============================================================ */
     :root {
       --bg-void:       #03050a;
       --bg-base:       #070b14;
@@ -32,10 +29,6 @@
       --accent-dim:    rgba(249,115,22,0.09);
       --accent-glow:   rgba(249,115,22,0.22);
       --accent-border: rgba(249,115,22,0.28);
-
-      --node-blue:     #3b82f6;
-      --node-green:    #10b981;
-      --node-purple:   #8b5cf6;
 
       --text-primary:  #e8eeff;
       --text-sub:      #6880a8;
@@ -78,9 +71,7 @@
       overflow: hidden;
     }
 
-    /* ============================================================
-       SIDEBAR & HQ ROOM MAP
-    ============================================================ */
+    /* SIDEBAR */
     #sidebar {
       width: var(--sidebar-w);
       flex-shrink: 0;
@@ -93,7 +84,7 @@
       transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
-    /* CEO Profile Header */
+    /* CEO Identity */
     .ceo-profile {
       padding: 16px;
       border-bottom: 1px solid var(--border-faint);
@@ -128,7 +119,7 @@
       margin-top: 1px;
     }
 
-    /* HQ Rooms List Header */
+    /* Rooms Directory */
     .rooms-label {
       font-size: 10px; font-weight: 700;
       letter-spacing: 1.5px;
@@ -139,7 +130,6 @@
       display: flex; align-items: center; gap: 6px;
     }
 
-    /* HQ Room Items */
     .hq-rooms-list {
       flex: 1;
       overflow-y: auto;
@@ -157,7 +147,6 @@
       display: flex; align-items: center; gap: 10px;
       cursor: pointer;
       transition: all 0.2s ease;
-      position: relative;
     }
 
     .room-item:hover {
@@ -217,14 +206,12 @@
       color: white;
     }
 
-    /* Workshop Status Footer */
     .sidebar-footer {
       padding: 12px 16px;
       border-top: 1px solid var(--border-faint);
       background: rgba(4,6,13,0.8);
       flex-shrink: 0;
     }
-
     .wf-row {
       display: flex; align-items: center; justify-content: space-between;
       font-size: 11px; color: var(--text-sub);
@@ -234,9 +221,7 @@
       color: var(--ok); font-weight: 600;
     }
 
-    /* ============================================================
-       WORKSPACE & CHAT CANVAS
-    ============================================================ */
+    /* WORKSPACE */
     #workspace {
       flex: 1; min-width: 0;
       display: flex; flex-direction: column;
@@ -330,9 +315,12 @@
       overflow-y: auto;
       position: relative; z-index: 1;
       padding: 16px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
-    /* ROOM WELCOME HERO CARD */
+    /* WELCOME HERO */
     #welcome {
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
@@ -367,7 +355,6 @@
       margin-bottom: 28px;
     }
 
-    /* Room Cards Grid */
     .room-cards-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -384,33 +371,31 @@
       text-align: right;
       cursor: pointer;
       transition: all 0.25s ease;
-      position: relative;
     }
 
     .rc-card:hover {
       border-color: var(--accent);
       background: var(--bg-card);
       transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
     }
 
-    .rc-card .rc-icon {
-      font-size: 24px; margin-bottom: 8px;
-    }
+    .rc-card .rc-icon { font-size: 24px; margin-bottom: 8px; }
     .rc-card .rc-name {
       font-family: 'Space Grotesk', sans-serif;
       font-size: 13px; font-weight: 700;
       color: var(--text-primary);
     }
-    .rc-card .rc-desc {
-      font-size: 11px; color: var(--text-sub);
-      margin-top: 4px; line-height: 1.5;
+    .rc-card .rc-desc { font-size: 11px; color: var(--text-sub); margin-top: 4px; }
+
+    /* MESSAGE CARDS */
+    .msg-wrap {
+      padding: 6px 24px;
+      animation: msgIn 0.3s ease;
     }
 
-    /* MESSAGE BUBBLES */
-    .msg-wrap {
-      padding: 8px 24px;
-      animation: msgIn 0.3s ease;
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     .msg-user {
@@ -419,12 +404,12 @@
     }
 
     .user-avatar {
-      width: 28px; height: 28px;
+      width: 30px; height: 30px;
       background: linear-gradient(135deg, var(--accent-gold), var(--accent));
       border-radius: var(--r-md);
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
-      font-size: 12px; font-weight: 700; color: black;
+      font-size: 13px; font-weight: 700; color: black;
     }
 
     .user-bubble {
@@ -437,44 +422,48 @@
       line-height: 1.65;
     }
 
-    /* AI Room Response Panel */
+    /* Distinct Agent Message Panel */
     .msg-ai {
-      display: flex; align-items: flex-start; gap: 10px;
+      display: flex; align-items: flex-start; gap: 12px;
+      margin-bottom: 4px;
     }
 
     .ai-avatar {
-      width: 28px; height: 28px;
+      width: 32px; height: 32px;
       background: var(--accent-dim);
-      border: 1px solid var(--accent-border);
+      border: 1.5px solid var(--accent-border);
       border-radius: var(--r-md);
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
-      font-size: 14px;
-      margin-top: 10px;
+      font-size: 16px;
+      margin-top: 4px;
+      box-shadow: 0 0 14px rgba(249,115,22,0.15);
     }
 
     .diag-panel {
       flex: 1; min-width: 0;
-      max-width: calc(100% - 38px);
+      max-width: calc(100% - 44px);
       background: var(--bg-elevated);
-      border: 1px solid var(--border-faint);
+      border: 1px solid var(--border-subtle);
       border-radius: var(--r-sm) var(--r-xl) var(--r-xl) var(--r-xl);
       overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .diag-panel:hover {
+      border-color: var(--border-mid);
     }
 
     .panel-header {
       display: flex; align-items: center; gap: 8px;
       padding: 10px 16px;
       border-bottom: 1px solid var(--border-faint);
-      background: rgba(249,115,22,0.04);
+      background: rgba(249,115,22,0.05);
     }
 
     .panel-type {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 10px; font-weight: 700;
-      letter-spacing: 1.5px; text-transform: uppercase;
+      font-size: 11px; font-weight: 700;
       color: var(--accent-gold);
-      direction: ltr;
     }
 
     .panel-divider {
@@ -490,11 +479,10 @@
     .panel-body {
       padding: 16px 18px;
       font-size: 14px; color: var(--text-primary);
-      line-height: 1.8;
+      line-height: 1.85;
     }
 
     .panel-body strong { color: var(--accent-warm); font-weight: 600; }
-
     .panel-body code {
       font-family: 'JetBrains Mono', monospace;
       font-size: 12px;
@@ -592,7 +580,6 @@
       direction: ltr;
     }
 
-    /* RESPONSIVE */
     @media (max-width: 820px) {
       #sidebar {
         position: fixed; top: 0; right: 0; height: 100%;
@@ -611,10 +598,10 @@
 
 <div id="app">
 
-  <!-- SIDEBAR: HQ ROOMS MAP & EXECUTIVE DIRECTORY -->
+  <!-- SIDEBAR -->
   <aside id="sidebar">
 
-    <!-- CEO Owner Identity Header -->
+    <!-- CEO Owner Profile -->
     <div class="ceo-profile">
       <div class="ceo-avatar">👑</div>
       <div class="ceo-info">
@@ -623,18 +610,16 @@
       </div>
     </div>
 
-    <!-- HQ Rooms Directory -->
+    <!-- HQ Directory -->
     <div class="rooms-label">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-        <polyline points="9 22 9 12 15 12 15 22"/>
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
       </svg>
       مكاتب وغرف مقار العمل
     </div>
 
     <div class="hq-rooms-list">
 
-      <!-- Boardroom (Team Meeting with Boss) -->
       <div class="room-item boardroom active" onclick="switchRoom('boardroom')">
         <div class="room-icon">🏛️</div>
         <div class="room-meta">
@@ -644,7 +629,6 @@
         <span class="room-badge">الكل</span>
       </div>
 
-      <!-- Private Office: Orchestrator Manager -->
       <div class="room-item" onclick="switchRoom('orchestrator')">
         <div class="room-icon">👔</div>
         <div class="room-meta">
@@ -654,7 +638,6 @@
         <span class="room-badge">خاص</span>
       </div>
 
-      <!-- Private Office: Doctor Auto Technical -->
       <div class="room-item" onclick="switchRoom('doctor_auto')">
         <div class="room-icon">🩺</div>
         <div class="room-meta">
@@ -664,7 +647,6 @@
         <span class="room-badge">خاص</span>
       </div>
 
-      <!-- Private Office: Marketing & Sales -->
       <div class="room-item" onclick="switchRoom('marketing')">
         <div class="room-icon">📢</div>
         <div class="room-meta">
@@ -674,7 +656,6 @@
         <span class="room-badge">خاص</span>
       </div>
 
-      <!-- Private Office: Booking & Operations -->
       <div class="room-item" onclick="switchRoom('booking')">
         <div class="room-icon">📅</div>
         <div class="room-meta">
@@ -686,7 +667,6 @@
 
     </div>
 
-    <!-- Workshop Status Footer -->
     <div class="sidebar-footer">
       <div class="wf-row">
         <span>مقر القيادة الرقمي:</span>
@@ -723,7 +703,7 @@
     <!-- MESSAGES -->
     <div id="messages">
 
-      <!-- WELCOME HERO STATE -->
+      <!-- WELCOME HERO -->
       <div id="welcome">
         <div class="w-eyebrow">EXECUTIVE VIRTUAL COMMAND CENTER</div>
         <h1 class="w-headline" id="welcome-title">مرحباً بك يا سعادة الرئيس في مقر عملك الرقمي</h1>
@@ -731,7 +711,6 @@
           أنت الآن في غرفة الاجتماعات الجماعية مع جميع رؤساء الأقسام. يمكنك مناقشة القواعد، التوجيهات، خطة العمل، وتوزيع المهام مباشرة.
         </p>
 
-        <!-- Room Cards Navigation Grid -->
         <div class="room-cards-grid">
           <div class="rc-card" onclick="switchRoom('boardroom')">
             <div class="rc-icon">🏛️</div>
@@ -855,20 +834,15 @@
     currentRoom = roomKey;
     const info = roomMetaInfo[roomKey];
 
-    // Update TopBar
     document.getElementById('current-room-badge').textContent = info.badge;
     document.getElementById('current-room-name').textContent = info.name;
-
-    // Update Welcome text
     document.getElementById('welcome-title').textContent = info.title;
     document.getElementById('welcome-desc').textContent = info.desc;
     $input.placeholder = info.placeholder;
 
-    // Update Sidebar active state
     document.querySelectorAll('.room-item').forEach(el => el.classList.remove('active'));
     event && event.currentTarget && event.currentTarget.classList && event.currentTarget.classList.add('active');
 
-    // Clear messages view for new room view
     const msgs = $messages.querySelectorAll('.msg-wrap, .typing-wrap');
     msgs.forEach(el => el.remove());
 
@@ -876,10 +850,9 @@
       $welcome.style.display = 'flex';
     } else {
       $welcome.style.display = 'none';
-      // Render room history
       histories[roomKey].forEach(msg => {
         if (msg.role === 'user') addUserMsgView(msg.content);
-        else addAIMsgView(msg.content, info.icon, info.badge);
+        else addAIMsgView(msg.content, msg.icon || info.icon, msg.title || info.badge);
       });
     }
 
@@ -915,7 +888,7 @@
     scrollBottom();
   }
 
-  function addAIMsgView(text, roomIcon, roomBadge) {
+  function addAIMsgView(text, roomIcon, roomTitle) {
     const now = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
     const wrap = document.createElement('div');
     wrap.className = 'msg-wrap';
@@ -924,7 +897,7 @@
         <div class="ai-avatar">${roomIcon || '🏛️'}</div>
         <div class="diag-panel">
           <div class="panel-header">
-            <span class="panel-type">${roomBadge || 'HQ MEETING'}</span>
+            <span class="panel-type">${roomTitle || 'HQ AGENT'}</span>
             <div class="panel-divider"></div>
             <span class="panel-time">${now}</span>
           </div>
@@ -1002,15 +975,24 @@
       const data = await res.json();
       removeTyping();
 
-      if (data.status === 'success' && data.reply) {
-        addAIMsgView(data.reply, info.icon, info.badge);
-        histories[currentRoom].push({ role: 'assistant', content: data.reply });
+      if (data.status === 'success') {
+        if (data.is_multi && Array.isArray(data.agent_replies)) {
+          let fullCombined = '';
+          data.agent_replies.forEach(agentMsg => {
+            addAIMsgView(agentMsg.content, agentMsg.icon, agentMsg.title);
+            fullCombined += `\n\n=== ${agentMsg.title} ===\n${agentMsg.content}`;
+          });
+          histories[currentRoom].push({ role: 'assistant', content: fullCombined });
+        } else if (data.reply) {
+          addAIMsgView(data.reply, info.icon, info.name);
+          histories[currentRoom].push({ role: 'assistant', content: data.reply });
+        }
       } else {
-        addAIMsgView(data.error || 'حدث خطأ في مقر العمل الرقمي', info.icon, info.badge);
+        addAIMsgView(data.error || 'حدث خطأ في مقر العمل الرقمي', info.icon, info.name);
       }
     } catch (err) {
       removeTyping();
-      addAIMsgView('تعذّر الاتصال بمقر العمل الرقمي. تحقق من اتصالك.', info.icon, info.badge);
+      addAIMsgView('تعذّر الاتصال بمقر العمل الرقمي. تحقق من اتصالك.', info.icon, info.name);
     } finally {
       loading = false;
       $send.disabled = false;
