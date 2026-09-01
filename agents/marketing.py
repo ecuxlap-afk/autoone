@@ -1,43 +1,35 @@
 """
-Marketing & Customer Service Agent - Independent Execution Module
+Marketing & Customer Relations Agent - Private Office & Boardroom Module
 """
 import requests
 
 DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions'
 
-MARKETING_SYSTEM_PROMPT = """أنت وكيل التسويق وخدمة العملاء لورشة "جار الله أوتو" (AutoOne).
+MARKETING_SYSTEM_PROMPT = """أنت مسؤول التسويق وخدمة العملاء في ورشة "جار الله أوتو".
 
-مهمتك المستقلة:
-- الترحيب بالعميل والرد عليه بأعلى مستويات اللباقة، الاحترام، والود.
-- أخذ التقرير التقني المقدم من (د. سيارات) وعرضه للعميل بطريقة مريحة، مفهومة، ومطمئنة.
-- التأكيد على تميز ورشة "جار الله أوتو" في الصيانة والبرمجة وحرصها على سلامة العميل.
-- دمج التقرير التقني والمصطلحات الإنجليزية بشكل احترافي وجذاب.
+تذكّر دائماً:
+- المستخدم الذي تتحدث معه الآن هو "المالك والرئيس التنفيذي لورشة جار الله أوتو" (Boss / Owner).
+- أنت في مكتب التسويق والعلاقات العامة (أو في اجتماع الإدارة).
+- تتحدث مع المالك بلباقة واحترام، وتطلعه على استراتيجيات خدمة العملاء، خطط الجذب، أسلوب التعامل، والعروض الترويجية لورشة جار الله أوتو.
+- تتقبل التوجيهات والقواعد وتناقش معه كيف نطور سمعة الورشة ورضا العملاء 100%.
 """
 
-def format_customer_response(api_key, user_query, technical_diagnosis):
+def talk_to_marketing_office(api_key, messages):
     """
-    Independent API execution for Marketing & Customer Service Agent.
+    1-on-1 private meeting in Marketing & Customer Relations Office with the Owner/Boss.
     """
     headers = {
         'Authorization': f'Bearer {api_key}',
         'Content-Type': 'application/json'
     }
 
-    user_content = f"""استفسار العميل: {user_query}
-
-تقرير د. سيارات التقني:
-{technical_diagnosis}
-
-صغ رد خدمة العملاء والتسويق النهائي للعميل بناءً على التقرير التقني أعلاه."""
-
     payload = {
         'model': 'deepseek-chat',
         'messages': [
-            {'role': 'system', 'content': MARKETING_SYSTEM_PROMPT},
-            {'role': 'user', 'content': user_content}
-        ],
+            {'role': 'system', 'content': MARKETING_SYSTEM_PROMPT}
+        ] + messages,
         'temperature': 0.7,
-        'max_tokens': 1000
+        'max_tokens': 1200
     }
 
     try:
@@ -45,6 +37,6 @@ def format_customer_response(api_key, user_query, technical_diagnosis):
         if response.status_code == 200:
             res_json = response.json()
             return res_json['choices'][0]['message']['content']
-        return technical_diagnosis
-    except Exception:
-        return technical_diagnosis
+        return "أهلاً بك يا سعادة الرئيس في مكتب التسويق. حدث خطأ بسيط في الاتصال، أنا في انتظار توجيهاتك."
+    except Exception as e:
+        return f"أهلاً سعادة الرئيس، حدث خطأ: {str(e)}"

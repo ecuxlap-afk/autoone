@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoVision AI | Multi-Agent Automotive Network</title>
-  <meta name="description" content="منظومة الوكلاء المتعددين لتشخيص وصيانة وحجز المواعيد للسيارات" />
+  <title>مقر إدارة جار الله أوتو | Enterprise Virtual HQ</title>
+  <meta name="description" content="مقر العمل الرقمي والقيادي لإدارة ورشة جار الله أوتو مع الفريق الذكي" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 
   <style>
     /* ============================================================
-       DESIGN SYSTEM
+       DESIGN SYSTEM - ENTERPRISE VIRTUAL HQ
     ============================================================ */
     :root {
-      --bg-void:       #04060d;
-      --bg-base:       #070b16;
-      --bg-surface:    #0b1222;
-      --bg-elevated:   #111b2e;
-      --bg-card:       #162032;
-      --bg-hover:      #1c2a3f;
+      --bg-void:       #03050a;
+      --bg-base:       #070b14;
+      --bg-surface:    #0a101d;
+      --bg-elevated:   #101728;
+      --bg-card:       #151f33;
+      --bg-hover:      #1b2740;
 
       --border-faint:  rgba(255,255,255,0.05);
       --border-subtle: rgba(255,255,255,0.09);
@@ -27,6 +27,7 @@
       --border-strong: rgba(255,255,255,0.22);
 
       --accent:        #f97316;
+      --accent-gold:   #eab308;
       --accent-warm:   #fb923c;
       --accent-dim:    rgba(249,115,22,0.09);
       --accent-glow:   rgba(249,115,22,0.22);
@@ -44,8 +45,8 @@
       --warn:  #fbbf24;
       --err:   #f87171;
 
-      --sidebar-w:   290px;
-      --header-h:    56px;
+      --sidebar-w:   310px;
+      --header-h:    60px;
       --r-sm:  4px;
       --r-md:  8px;
       --r-lg:  12px;
@@ -64,16 +65,13 @@
       line-height: 1.6;
     }
 
-    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 99px; }
 
-    button { cursor: pointer; }
+    button { cursor: pointer; font-family: inherit; }
     textarea { font-family: inherit; }
 
-    /* ============================================================
-       APP SHELL
-    ============================================================ */
     #app {
       display: flex;
       height: 100vh;
@@ -81,7 +79,7 @@
     }
 
     /* ============================================================
-       SIDEBAR & NETWORK GRAPH PANEL
+       SIDEBAR & HQ ROOM MAP
     ============================================================ */
     #sidebar {
       width: var(--sidebar-w);
@@ -95,181 +93,149 @@
       transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
-    .sb-brand {
+    /* CEO Profile Header */
+    .ceo-profile {
       padding: 16px;
       border-bottom: 1px solid var(--border-faint);
+      background: rgba(234,179,8,0.04);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       flex-shrink: 0;
     }
 
-    .sb-logo {
-      width: 32px; height: 32px;
-      background: var(--accent);
+    .ceo-avatar {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent));
       border-radius: var(--r-md);
       display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 16px rgba(234,179,8,0.3);
       flex-shrink: 0;
-      box-shadow: 0 0 16px var(--accent-glow);
     }
 
-    .sb-name {
+    .ceo-info { flex: 1; min-width: 0; }
+    .ceo-title {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 14px; font-weight: 700;
+      font-size: 13px; font-weight: 700;
       color: var(--text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ceo-role {
+      font-size: 10px; font-weight: 600;
+      color: var(--accent-gold);
       letter-spacing: 0.5px;
-      direction: ltr;
-      line-height: 1;
-    }
-    .sb-name .hl { color: var(--accent); }
-    .sb-tagline {
-      font-size: 10px; color: var(--text-muted);
-      letter-spacing: 0.3px;
-      direction: ltr;
-      margin-top: 2px;
+      margin-top: 1px;
     }
 
-    /* Multi-Agent Graph Container (n8n Style) */
-    .agent-topology-section {
-      padding: 14px 12px;
-      border-bottom: 1px solid var(--border-faint);
-      background: rgba(4,6,13,0.6);
-      flex-shrink: 0;
-    }
-
-    .at-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 12px;
-    }
-    .at-title {
-      font-family: 'Space Grotesk', sans-serif;
+    /* HQ Rooms List Header */
+    .rooms-label {
       font-size: 10px; font-weight: 700;
-      letter-spacing: 1.2px; text-transform: uppercase;
-      color: var(--accent);
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      padding: 14px 16px 6px;
+      text-transform: uppercase;
       direction: ltr;
       display: flex; align-items: center; gap: 6px;
     }
 
-    /* n8n Nodes Visual Tree */
-    .n8n-tree {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      position: relative;
-    }
-
-    /* Node Box */
-    .node-box {
-      width: 100%;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--r-md);
-      padding: 8px 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      position: relative;
-      transition: all 0.25s ease;
-    }
-    .node-box.orchestrator {
-      border-color: var(--accent-border);
-      background: var(--accent-dim);
-      box-shadow: 0 0 12px rgba(249,115,22,0.1);
-    }
-    .node-box.tech { border-left: 3px solid var(--node-blue); }
-    .node-box.mkt  { border-left: 3px solid var(--node-green); }
-    .node-box.book { border-left: 3px solid var(--node-purple); }
-
-    .node-box.active {
-      border-color: var(--accent);
-      box-shadow: 0 0 20px rgba(249,115,22,0.3);
-      animation: nodePulse 1.5s ease-in-out infinite;
-    }
-
-    @keyframes nodePulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.02); }
-    }
-
-    .node-icon {
-      width: 24px; height: 24px;
-      border-radius: var(--r-sm);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      background: rgba(255,255,255,0.05);
-    }
-    .node-info { flex: 1; min-width: 0; }
-    .node-name {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 11px; font-weight: 600;
-      color: var(--text-primary);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      direction: rtl;
-    }
-    .node-role {
-      font-size: 9px; color: var(--text-sub);
-      direction: rtl;
-    }
-
-    .node-status-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--ok);
-    }
-
-    /* Connector lines between Orchestrator and Sub-Agents */
-    .connector-line {
-      width: 2px;
-      height: 10px;
-      background: var(--border-subtle);
-    }
-
-    .sub-nodes-grid {
+    /* HQ Room Items */
+    .hq-rooms-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 12px;
       display: flex;
       flex-direction: column;
       gap: 6px;
-      width: 100%;
-      padding-right: 12px;
-      border-right: 2px dashed var(--border-subtle);
     }
 
-    /* Session list */
-    .sb-section { flex: 1; overflow-y: auto; }
-    .sb-label {
-      font-size: 10px; font-weight: 600;
-      letter-spacing: 1.3px;
-      color: var(--text-muted);
-      padding: 14px 18px 6px;
-      text-transform: uppercase;
-      direction: ltr;
-    }
-
-    .sess-item {
+    .room-item {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--r-lg);
+      padding: 10px 12px;
       display: flex; align-items: center; gap: 10px;
-      padding: 9px 18px;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: all 0.2s ease;
+      position: relative;
     }
-    .sess-item:hover { background: var(--bg-elevated); }
-    .sess-item.active { background: var(--accent-dim); }
 
-    .sess-dot {
-      width: 5px; height: 5px;
-      border-radius: 50%;
-      background: var(--text-muted);
+    .room-item:hover {
+      border-color: var(--border-mid);
+      background: var(--bg-card);
+      transform: translateX(-3px);
+    }
+
+    .room-item.active {
+      border-color: var(--accent-border);
+      background: var(--accent-dim);
+      box-shadow: 0 0 16px rgba(249,115,22,0.12);
+    }
+
+    .room-item.boardroom {
+      border-color: rgba(234,179,8,0.25);
+      background: rgba(234,179,8,0.05);
+    }
+    .room-item.boardroom.active {
+      border-color: var(--accent-gold);
+      background: rgba(234,179,8,0.12);
+      box-shadow: 0 0 20px rgba(234,179,8,0.2);
+    }
+
+    .room-icon {
+      width: 32px; height: 32px;
+      border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      background: rgba(255,255,255,0.05);
       flex-shrink: 0;
     }
-    .sess-item.active .sess-dot { background: var(--accent); }
 
-    .sess-title {
-      font-size: 12.5px; color: var(--text-sub);
+    .room-meta { flex: 1; min-width: 0; }
+    .room-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px; font-weight: 600;
+      color: var(--text-primary);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .sess-item.active .sess-title { color: var(--text-primary); }
+    .room-desc {
+      font-size: 10px; color: var(--text-sub);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-top: 1px;
+    }
+
+    .room-badge {
+      font-size: 9px; font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.06);
+      color: var(--text-muted);
+      direction: ltr;
+    }
+    .room-item.active .room-badge {
+      background: var(--accent);
+      color: white;
+    }
+
+    /* Workshop Status Footer */
+    .sidebar-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border-faint);
+      background: rgba(4,6,13,0.8);
+      flex-shrink: 0;
+    }
+
+    .wf-row {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 11px; color: var(--text-sub);
+    }
+    .wf-val {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--ok); font-weight: 600;
+    }
 
     /* ============================================================
-       WORKSPACE
+       WORKSPACE & CHAT CANVAS
     ============================================================ */
     #workspace {
       flex: 1; min-width: 0;
@@ -313,28 +279,27 @@
       border-radius: var(--r-md);
       color: var(--text-sub);
       align-items: center; justify-content: center;
-      transition: all 0.2s;
     }
 
-    .tb-session-info {
+    .tb-room-title {
       display: flex; align-items: center; gap: 8px;
     }
 
     .tb-badge {
-      font-size: 10px; font-weight: 600;
+      font-size: 10px; font-weight: 700;
       letter-spacing: 1px; text-transform: uppercase;
-      color: var(--accent);
+      color: var(--accent-gold);
       padding: 3px 8px;
-      background: var(--accent-dim);
-      border: 1px solid var(--accent-border);
+      background: rgba(234,179,8,0.1);
+      border: 1px solid rgba(234,179,8,0.25);
       border-radius: 20px;
       direction: ltr;
     }
 
     .tb-title {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 13px; font-weight: 500;
-      color: var(--text-sub);
+      font-size: 13.5px; font-weight: 600;
+      color: var(--text-primary);
     }
 
     .tb-right { display: flex; align-items: center; gap: 8px; }
@@ -359,195 +324,138 @@
       animation: pulse-ok 2.5s ease-in-out infinite;
     }
 
-    /* ============================================================
-       MESSAGES
-    ============================================================ */
+    /* MESSAGES AREA */
     #messages {
       flex: 1; min-height: 0;
       overflow-y: auto;
       position: relative; z-index: 1;
+      padding: 16px 0;
     }
 
-    /* WELCOME STATE */
+    /* ROOM WELCOME HERO CARD */
     #welcome {
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       min-height: 100%;
-      padding: 40px 28px;
+      padding: 32px 24px;
       text-align: center;
-      animation: fadein 0.6s ease;
+      animation: fadein 0.5s ease;
     }
 
     .w-eyebrow {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 10px; font-weight: 600;
+      font-size: 10px; font-weight: 700;
       letter-spacing: 2.5px; text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 14px;
+      color: var(--accent-gold);
+      margin-bottom: 12px;
       direction: ltr;
     }
 
     .w-headline {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(20px, 2.8vw, 30px);
+      font-size: clamp(20px, 2.5vw, 28px);
       font-weight: 700;
       color: var(--text-primary);
-      line-height: 1.25;
-      margin-bottom: 12px;
-      max-width: 480px;
+      line-height: 1.3;
+      margin-bottom: 10px;
+      max-width: 540px;
     }
 
     .w-sub {
-      font-size: 14px; color: var(--text-sub);
-      max-width: 420px; line-height: 1.75;
-      margin-bottom: 36px;
-    }
-
-    /* Visual n8n Canvas Hero Widget */
-    .hero-topology-canvas {
-      width: 100%; max-width: 700px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--r-xl);
-      padding: 20px;
+      font-size: 13.5px; color: var(--text-sub);
+      max-width: 460px; line-height: 1.7;
       margin-bottom: 28px;
-      position: relative;
-      overflow: hidden;
     }
 
-    .htc-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 16px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border-faint);
-    }
-    .htc-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 11px; font-weight: 700;
-      letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--text-primary);
-      direction: ltr;
-    }
-
-    .htc-graph {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .htc-node-main {
-      background: var(--accent-dim);
-      border: 1.5px solid var(--accent-border);
-      border-radius: var(--r-lg);
-      padding: 10px 20px;
-      display: flex; align-items: center; gap: 10px;
-      box-shadow: 0 0 20px rgba(249,115,22,0.15);
-    }
-
-    .htc-sub-row {
+    /* Room Cards Grid */
+    .room-cards-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
-      width: 100%;
+      width: 100%; max-width: 680px;
+      margin-bottom: 24px;
     }
 
-    .htc-sub-card {
+    .rc-card {
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
-      border-radius: var(--r-md);
-      padding: 12px;
+      border-radius: var(--r-xl);
+      padding: 16px;
       text-align: right;
       cursor: pointer;
       transition: all 0.25s ease;
+      position: relative;
     }
-    .htc-sub-card:hover {
+
+    .rc-card:hover {
       border-color: var(--accent);
+      background: var(--bg-card);
       transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
     }
 
-    .htc-sub-card .sc-name {
+    .rc-card .rc-icon {
+      font-size: 24px; margin-bottom: 8px;
+    }
+    .rc-card .rc-name {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 12px; font-weight: 600;
+      font-size: 13px; font-weight: 700;
       color: var(--text-primary);
     }
-    .htc-sub-card .sc-desc {
-      font-size: 10px; color: var(--text-sub); margin-top: 4px;
+    .rc-card .rc-desc {
+      font-size: 11px; color: var(--text-sub);
+      margin-top: 4px; line-height: 1.5;
     }
 
-    /* Quick prompts */
-    .quick-row {
-      display: flex; flex-wrap: wrap; gap: 8px;
-      justify-content: center;
-      max-width: 600px;
-    }
-
-    .q-chip {
-      padding: 6px 14px;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-subtle);
-      border-radius: 20px;
-      font-size: 12px; color: var(--text-sub);
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-    .q-chip:hover {
-      border-color: var(--accent-border);
-      color: var(--text-primary);
-      background: var(--accent-dim);
-    }
-
-    /* MESSAGE FEED */
+    /* MESSAGE BUBBLES */
     .msg-wrap {
-      padding: 6px 22px;
+      padding: 8px 24px;
       animation: msgIn 0.3s ease;
     }
 
     .msg-user {
       display: flex; justify-content: flex-end;
-      align-items: flex-end; gap: 8px;
+      align-items: flex-end; gap: 10px;
     }
 
     .user-avatar {
-      width: 26px; height: 26px;
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent));
       border-radius: var(--r-md);
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
-      color: var(--text-muted);
+      font-size: 12px; font-weight: 700; color: black;
     }
 
     .user-bubble {
-      max-width: 62%;
+      max-width: 65%;
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
       border-radius: var(--r-xl) var(--r-sm) var(--r-xl) var(--r-xl);
-      padding: 11px 15px;
+      padding: 12px 16px;
       font-size: 14px; color: var(--text-primary);
       line-height: 1.65;
     }
 
-    /* AI diagnostic panel */
+    /* AI Room Response Panel */
     .msg-ai {
       display: flex; align-items: flex-start; gap: 10px;
     }
 
     .ai-avatar {
-      width: 26px; height: 26px;
+      width: 28px; height: 28px;
       background: var(--accent-dim);
       border: 1px solid var(--accent-border);
       border-radius: var(--r-md);
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
-      color: var(--accent);
-      margin-top: 12px;
+      font-size: 14px;
+      margin-top: 10px;
     }
 
     .diag-panel {
       flex: 1; min-width: 0;
-      max-width: calc(100% - 36px);
+      max-width: calc(100% - 38px);
       background: var(--bg-elevated);
       border: 1px solid var(--border-faint);
       border-radius: var(--r-sm) var(--r-xl) var(--r-xl) var(--r-xl);
@@ -556,16 +464,16 @@
 
     .panel-header {
       display: flex; align-items: center; gap: 8px;
-      padding: 9px 14px;
+      padding: 10px 16px;
       border-bottom: 1px solid var(--border-faint);
       background: rgba(249,115,22,0.04);
     }
 
     .panel-type {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 9.5px; font-weight: 700;
+      font-size: 10px; font-weight: 700;
       letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--accent);
+      color: var(--accent-gold);
       direction: ltr;
     }
 
@@ -580,7 +488,7 @@
     }
 
     .panel-body {
-      padding: 14px 16px;
+      padding: 16px 18px;
       font-size: 14px; color: var(--text-primary);
       line-height: 1.8;
     }
@@ -599,15 +507,12 @@
     }
 
     /* Typing */
-    .typing-wrap { padding: 6px 22px; }
-
-    .typing-row {
-      display: flex; align-items: flex-start; gap: 10px;
-    }
+    .typing-wrap { padding: 8px 24px; }
+    .typing-row { display: flex; align-items: flex-start; gap: 10px; }
 
     .typing-dots {
       display: flex; gap: 4px;
-      padding: 13px 16px;
+      padding: 14px 18px;
       background: var(--bg-elevated);
       border: 1px solid var(--border-faint);
       border-radius: var(--r-sm) var(--r-xl) var(--r-xl) var(--r-xl);
@@ -638,19 +543,19 @@
       position: relative; z-index: 10;
     }
 
-    .input-inner { max-width: 820px; margin: 0 auto; }
+    .input-inner { max-width: 840px; margin: 0 auto; }
 
     .input-box {
       display: flex; align-items: flex-end; gap: 10px;
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
       border-radius: var(--r-2xl);
-      padding: 10px 10px 10px 12px;
+      padding: 10px 10px 10px 14px;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
     .input-box:focus-within {
-      border-color: rgba(249,115,22,0.38);
-      box-shadow: 0 0 0 3px rgba(249,115,22,0.06);
+      border-color: rgba(234,179,8,0.4);
+      box-shadow: 0 0 0 3px rgba(234,179,8,0.06);
     }
 
     #msg-input {
@@ -660,25 +565,25 @@
       font-family: 'Inter', sans-serif;
       font-size: 14px; line-height: 1.6;
       resize: none;
-      min-height: 22px; max-height: 120px;
+      min-height: 24px; max-height: 120px;
       direction: rtl;
       padding: 2px 2px;
     }
     #msg-input::placeholder { color: var(--text-muted); }
 
     #send-btn {
-      width: 38px; height: 38px;
-      background: var(--accent);
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent));
       border: none;
       border-radius: var(--r-lg);
-      color: white;
+      color: black;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
       transition: all 0.2s;
-      box-shadow: 0 4px 16px rgba(249,115,22,0.3);
+      box-shadow: 0 4px 16px rgba(234,179,8,0.25);
     }
-    #send-btn:hover { background: var(--accent-warm); transform: scale(1.04); }
-    #send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    #send-btn:hover { transform: scale(1.04); }
+    #send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 
     .input-meta {
       display: flex; justify-content: space-between; align-items: center;
@@ -691,13 +596,14 @@
     @media (max-width: 820px) {
       #sidebar {
         position: fixed; top: 0; right: 0; height: 100%;
-        width: min(300px, 86vw);
+        width: min(310px, 88vw);
         transform: translateX(110%);
         z-index: 100;
       }
       #sidebar.open { transform: translateX(0); }
       #menu-btn { display: flex; }
-      .htc-sub-row { grid-template-columns: 1fr; }
+      .room-cards-grid { grid-template-columns: 1fr; }
+      .user-bubble { max-width: 82%; }
     }
   </style>
 </head>
@@ -705,85 +611,86 @@
 
 <div id="app">
 
-  <!-- SIDEBAR (Includes Visual Agent Network Topology) -->
+  <!-- SIDEBAR: HQ ROOMS MAP & EXECUTIVE DIRECTORY -->
   <aside id="sidebar">
 
-    <div class="sb-brand">
-      <div class="sb-logo">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4"/>
-        </svg>
-      </div>
-      <div>
-        <div class="sb-name">AUTO<span class="hl">VISION</span> AI</div>
-        <div class="sb-tagline">Multi-Agent Network Architecture</div>
+    <!-- CEO Owner Identity Header -->
+    <div class="ceo-profile">
+      <div class="ceo-avatar">👑</div>
+      <div class="ceo-info">
+        <div class="ceo-title">مالك ورشة جار الله أوتو</div>
+        <div class="ceo-role">الرئيس والمالك الأساسي (CEO)</div>
       </div>
     </div>
 
-    <!-- Multi-Agent n8n Topology Visualizer -->
-    <div class="agent-topology-section">
-      <div class="at-header">
-        <span class="at-title">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-          </svg>
-          AGENT NETWORK TOPOLOGY
-        </span>
-      </div>
-
-      <div class="n8n-tree">
-        <!-- Root Manager Node -->
-        <div class="node-box orchestrator" id="node-orchestrator">
-          <div class="node-icon">👔</div>
-          <div class="node-info">
-            <div class="node-name">Chief Orchestrator</div>
-            <div class="node-role">المدير والمشرف العام</div>
-          </div>
-          <div class="node-status-dot"></div>
-        </div>
-
-        <div class="connector-line"></div>
-
-        <!-- Sub-Agents Grid -->
-        <div class="sub-nodes-grid">
-          <div class="node-box tech" id="node-doctor">
-            <div class="node-icon">🩺</div>
-            <div class="node-info">
-              <div class="node-name">Dr. Auto Technical</div>
-              <div class="node-role">دكتور فحص السيارات</div>
-            </div>
-            <div class="node-status-dot"></div>
-          </div>
-
-          <div class="node-box mkt" id="node-marketing">
-            <div class="node-icon">📢</div>
-            <div class="node-info">
-              <div class="node-name">Marketing & Service</div>
-              <div class="node-role">التسويق وخدمة العملاء</div>
-            </div>
-            <div class="node-status-dot"></div>
-          </div>
-
-          <div class="node-box book" id="node-booking">
-            <div class="node-icon">📅</div>
-            <div class="node-info">
-              <div class="node-name">Booking & Scheduler</div>
-              <div class="node-role">حجز وتأكيد المواعيد</div>
-            </div>
-            <div class="node-status-dot"></div>
-          </div>
-        </div>
-      </div>
+    <!-- HQ Rooms Directory -->
+    <div class="rooms-label">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      مكاتب وغرف مقار العمل
     </div>
 
-    <!-- Sessions -->
-    <div class="sb-section">
-      <div class="sb-label">CURRENT ACTIVE SESSION</div>
-      <div class="sess-item active">
-        <div class="sess-dot"></div>
-        <div class="sess-title">جلسة فحص شاملة</div>
+    <div class="hq-rooms-list">
+
+      <!-- Boardroom (Team Meeting with Boss) -->
+      <div class="room-item boardroom active" onclick="switchRoom('boardroom')">
+        <div class="room-icon">🏛️</div>
+        <div class="room-meta">
+          <div class="room-name">غرفة الاجتماعات الجماعية</div>
+          <div class="room-desc">اجتماع مع كل فريق الوكلاء مجتمعين</div>
+        </div>
+        <span class="room-badge">الكل</span>
+      </div>
+
+      <!-- Private Office: Orchestrator Manager -->
+      <div class="room-item" onclick="switchRoom('orchestrator')">
+        <div class="room-icon">👔</div>
+        <div class="room-meta">
+          <div class="room-name">مكتب المشرف العام</div>
+          <div class="room-desc">اجتماع مغلق 1-on-1 مع مدير الفريق</div>
+        </div>
+        <span class="room-badge">خاص</span>
+      </div>
+
+      <!-- Private Office: Doctor Auto Technical -->
+      <div class="room-item" onclick="switchRoom('doctor_auto')">
+        <div class="room-icon">🩺</div>
+        <div class="room-meta">
+          <div class="room-name">مكتب دكتور السيارات</div>
+          <div class="room-desc">استشارة مغلقة حول الأعطال والأجهزة</div>
+        </div>
+        <span class="room-badge">خاص</span>
+      </div>
+
+      <!-- Private Office: Marketing & Sales -->
+      <div class="room-item" onclick="switchRoom('marketing')">
+        <div class="room-icon">📢</div>
+        <div class="room-meta">
+          <div class="room-name">مكتب التسويق والعملاء</div>
+          <div class="room-desc">مناقشة حملات الخدمة وأسلوب التعامل</div>
+        </div>
+        <span class="room-badge">خاص</span>
+      </div>
+
+      <!-- Private Office: Booking & Operations -->
+      <div class="room-item" onclick="switchRoom('booking')">
+        <div class="room-icon">📅</div>
+        <div class="room-meta">
+          <div class="room-name">مكتب المواعيد والعمليات</div>
+          <div class="room-desc">تنظيم الطاقة الاستيعابية وجدول الورشة</div>
+        </div>
+        <span class="room-badge">خاص</span>
+      </div>
+
+    </div>
+
+    <!-- Workshop Status Footer -->
+    <div class="sidebar-footer">
+      <div class="wf-row">
+        <span>مقر القيادة الرقمي:</span>
+        <span class="wf-val">جار الله أوتو</span>
       </div>
     </div>
 
@@ -800,15 +707,15 @@
             <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
           </svg>
         </button>
-        <div class="tb-session-info">
-          <span class="tb-badge">MULTI-AGENT ACTIVE</span>
-          <span class="tb-title" id="session-title">شبكة الوكلاء جاهزة</span>
+        <div class="tb-room-title">
+          <span class="tb-badge" id="current-room-badge">BOARDROOM</span>
+          <span class="tb-title" id="current-room-name">غرفة الاجتماعات الجماعية (مجلس الإدارة)</span>
         </div>
       </div>
       <div class="tb-right">
         <div class="status-pill">
           <div class="status-dot"></div>
-          <span>NETWORK ONLINE</span>
+          <span>HQ ONLINE</span>
         </div>
       </div>
     </div>
@@ -818,56 +725,37 @@
 
       <!-- WELCOME HERO STATE -->
       <div id="welcome">
-        <div class="w-eyebrow">MULTI-AGENT AUTOMOTIVE PLATFORM</div>
-        <h1 class="w-headline">شبكة الوكلاء المتعددين لـ جار الله أوتو</h1>
-        <p class="w-sub">
-          نظام متكامل يضم فريقاً من الوكلاء المستقلين (دكتور السيارات الفني + التسويق وخدمة العملاء + مسؤول المواعيد) تحت إدارة المشرف العام.
+        <div class="w-eyebrow">EXECUTIVE VIRTUAL COMMAND CENTER</div>
+        <h1 class="w-headline" id="welcome-title">مرحباً بك يا سعادة الرئيس في مقر عملك الرقمي</h1>
+        <p class="w-sub" id="welcome-desc">
+          أنت الآن في غرفة الاجتماعات الجماعية مع جميع رؤساء الأقسام. يمكنك مناقشة القواعد، التوجيهات، خطة العمل، وتوزيع المهام مباشرة.
         </p>
 
-        <!-- Interactive n8n Canvas Card -->
-        <div class="hero-topology-canvas">
-          <div class="htc-header">
-            <span class="htc-title">MULTI-AGENT WORKFLOW PIPELINE</span>
-            <span style="font-size:10px; color:var(--accent)">n8n / LangGraph Engine</span>
+        <!-- Room Cards Navigation Grid -->
+        <div class="room-cards-grid">
+          <div class="rc-card" onclick="switchRoom('boardroom')">
+            <div class="rc-icon">🏛️</div>
+            <div class="rc-name">غرفة الاجتماعات الجماعية</div>
+            <div class="rc-desc">اجتماع مع كل فريق الوكلاء للتباحث ووضع القواعد</div>
           </div>
 
-          <div class="htc-graph">
-            <div class="htc-node-main">
-              <span style="font-size:18px">👔</span>
-              <div style="text-align:right">
-                <div style="font-weight:700; font-size:13px">Chief Orchestrator Agent</div>
-                <div style="font-size:10px; color:var(--text-sub)">المدير المسؤول عن استقبال الاستفسار وتوزيع المهام</div>
-              </div>
-            </div>
-
-            <div style="width:2px; height:12px; background:var(--border-subtle)"></div>
-
-            <div class="htc-sub-row">
-              <div class="htc-sub-card" onclick="sendQuickText('أريد فحص عطل وحل مشكلة الموتور')">
-                <div style="font-size:16px">🩺</div>
-                <div class="sc-name">دكتور السيارات</div>
-                <div class="sc-desc">تشخيص هندسي، أكواد DTCs، ومصطلحات ECU</div>
-              </div>
-
-              <div class="htc-sub-card" onclick="sendQuickText('ما هي الخدمات والعروض المتوفرة لخدمات الصيانة؟')">
-                <div style="font-size:16px">📢</div>
-                <div class="sc-name">خدمة العملاء</div>
-                <div class="sc-desc">ترحيب راقي وتواصل ممتاز يمثل جار الله أوتو</div>
-              </div>
-
-              <div class="htc-sub-card" onclick="sendQuickText('أريد حجز موعد لفحص سيارتي في الورشة')">
-                <div style="font-size:16px">📅</div>
-                <div class="sc-name">وكيل المواعيد</div>
-                <div class="sc-desc">ترتيب وحجز مواعيد الزيارة والصيانة</div>
-              </div>
-            </div>
+          <div class="rc-card" onclick="switchRoom('doctor_auto')">
+            <div class="rc-icon">🩺</div>
+            <div class="rc-name">مكتب دكتور السيارات الفني</div>
+            <div class="rc-desc">اجتماع مغلق مع رئيس قسم الصيانة والبرمجة</div>
           </div>
-        </div>
 
-        <div class="quick-row">
-          <div class="q-chip" onclick="sendQuickText('عندي مشكلة هزّة في السيارة وكود P0300 وشو الحل؟')">فحص عطل P0300</div>
-          <div class="q-chip" onclick="sendQuickText('أريد حجز موعد فحص كمبيوتر وتكييف غداً')">حجز موعد فحص</div>
-          <div class="q-chip" onclick="sendQuickText('كم تكلفة ونوع خدمات صيانة الكنترولات والبرمجة؟')">خدمات البرمجة</div>
+          <div class="rc-card" onclick="switchRoom('marketing')">
+            <div class="rc-icon">📢</div>
+            <div class="rc-name">مكتب التسويق والعملاء</div>
+            <div class="rc-desc">اجتماع مغلق مع مسؤول التسويق والعروض</div>
+          </div>
+
+          <div class="rc-card" onclick="switchRoom('booking')">
+            <div class="rc-icon">📅</div>
+            <div class="rc-name">مكتب المواعيد والعمليات</div>
+            <div class="rc-desc">اجتماع مغلق مع مدير حجز ومواعيد الورشة</div>
+          </div>
         </div>
       </div>
 
@@ -877,14 +765,14 @@
     <div id="input-zone">
       <div class="input-inner">
         <div class="input-box">
-          <button id="send-btn" onclick="sendMessage()" title="إرسال">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="white">
+          <button id="send-btn" onclick="sendMessage()" title="إرسال توجيه">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="black">
               <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
             </svg>
           </button>
           <textarea
             id="msg-input"
-            placeholder="اسأل شبكة الوكلاء أو اطلب حجز موعد..."
+            placeholder="اكتب توجيهاتك كرئيس ومالك لـ جار الله أوتو..."
             rows="1"
             onkeydown="handleKey(event)"
             oninput="resizeInput(this)"
@@ -902,9 +790,58 @@
 </div>
 
 <script>
-  let history  = [];
-  let loading  = false;
-  let msgCount = 0;
+  let currentRoom = 'boardroom';
+  let histories = {
+    'boardroom': [],
+    'orchestrator': [],
+    'doctor_auto': [],
+    'marketing': [],
+    'booking': []
+  };
+  let loading = false;
+
+  const roomMetaInfo = {
+    'boardroom': {
+      name: 'غرفة الاجتماعات الجماعية (مجلس الإدارة)',
+      badge: 'BOARDROOM',
+      icon: '🏛️',
+      title: 'مرحباً بك يا سعادة الرئيس في غرفة الاجتماعات الجماعية',
+      desc: 'أنت الآن تجتمع مع كل فريق الوكلاء مجتمعين. يمكنك مناقشة القواعد، الاستراتيجية، وإيقاف أو توجيه فريق العمل.',
+      placeholder: 'اكتب توجيهاتك أو قوانين العمل لكل فريق الوكلاء مجتمعين...'
+    },
+    'orchestrator': {
+      name: 'مكتب المشرف العام والمدير التنفيذي',
+      badge: 'MANAGER OFFICE',
+      icon: '👔',
+      title: 'اجتماع خاص مغلق مع المشرف العام',
+      desc: 'أنت الآن في مكتب المدير المشرف (1-on-1). ناقش معه إدارة باقي الوكلاء، الأداء العام، وتطبيق التوجيهات.',
+      placeholder: 'وجه توجيهاتك الإدارية للمشرف العام على الفريق...'
+    },
+    'doctor_auto': {
+      name: 'مكتب دكتور السيارات (رئيس الفحص والبرمجة)',
+      badge: 'TECH DOCTOR OFFICE',
+      icon: '🩺',
+      title: 'اجتماع خاص مغلق مع دكتور السيارات الفني',
+      desc: 'أنت الآن في مكتب رئيس قسم الصيانة والبرمجة. ناقش معه معايير الفحص، الأجهزة المعتمدة، والحلول التقنية.',
+      placeholder: 'ناقش المعايير والأعطال والأجهزة مع دكتور السيارات...'
+    },
+    'marketing': {
+      name: 'مكتب مسؤول التسويق وخدمة العملاء',
+      badge: 'MARKETING OFFICE',
+      icon: '📢',
+      title: 'اجتماع خاص مغلق مع مسؤول التسويق',
+      desc: 'أنت الآن في مكتب مسؤول التسويق والعلاقات. ناقش معه عروض الورشة، أسلوب استقبال العملاء، ورسائل التسويق.',
+      placeholder: 'ناقش خطة التسويق وأسلوب الردود مع مسؤول العلاقات...'
+    },
+    'booking': {
+      name: 'مكتب مدير المواعيد والعمليات التشغيلية',
+      badge: 'OPERATIONS OFFICE',
+      icon: '📅',
+      title: 'اجتماع خاص مغلق مع مدير المواعيد والعمليات',
+      desc: 'أنت الآن في مكتب مدير حجز المواعيد. ناقش معه طاقة الورشة الاستيعابية، تنزيل المواعيد، وتسهيل الزيارات.',
+      placeholder: 'ناقش خطة تنظيم وحجز المواعيد وطاقة الورشة...'
+    }
+  };
 
   const $messages = document.getElementById('messages');
   const $welcome  = document.getElementById('welcome');
@@ -914,9 +851,39 @@
 
   function toggleSidebar() { $sidebar.classList.toggle('open'); }
 
-  function sendQuickText(text) {
-    $input.value = text;
-    sendMessage();
+  function switchRoom(roomKey) {
+    currentRoom = roomKey;
+    const info = roomMetaInfo[roomKey];
+
+    // Update TopBar
+    document.getElementById('current-room-badge').textContent = info.badge;
+    document.getElementById('current-room-name').textContent = info.name;
+
+    // Update Welcome text
+    document.getElementById('welcome-title').textContent = info.title;
+    document.getElementById('welcome-desc').textContent = info.desc;
+    $input.placeholder = info.placeholder;
+
+    // Update Sidebar active state
+    document.querySelectorAll('.room-item').forEach(el => el.classList.remove('active'));
+    event && event.currentTarget && event.currentTarget.classList && event.currentTarget.classList.add('active');
+
+    // Clear messages view for new room view
+    const msgs = $messages.querySelectorAll('.msg-wrap, .typing-wrap');
+    msgs.forEach(el => el.remove());
+
+    if (histories[roomKey].length === 0) {
+      $welcome.style.display = 'flex';
+    } else {
+      $welcome.style.display = 'none';
+      // Render room history
+      histories[roomKey].forEach(msg => {
+        if (msg.role === 'user') addUserMsgView(msg.content);
+        else addAIMsgView(msg.content, info.icon, info.badge);
+      });
+    }
+
+    $input.focus();
   }
 
   function resizeInput(el) {
@@ -931,53 +898,33 @@
     }
   }
 
-  function highlightNodesActive(active) {
-    const nodes = ['node-orchestrator', 'node-doctor', 'node-marketing', 'node-booking'];
-    nodes.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        if (active) el.classList.add('active');
-        else el.classList.remove('active');
-      }
-    });
-  }
-
   function hideWelcome() {
     if ($welcome) $welcome.style.display = 'none';
   }
 
-  function addUser(text) {
+  function addUserMsgView(text) {
     hideWelcome();
     const wrap = document.createElement('div');
     wrap.className = 'msg-wrap';
     wrap.innerHTML = `
       <div class="msg-user">
         <div class="user-bubble">${escHtml(text).replace(/\n/g,'<br>')}</div>
-        <div class="user-avatar">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-          </svg>
-        </div>
+        <div class="user-avatar">👑</div>
       </div>`;
     $messages.appendChild(wrap);
-    msgCount++;
     scrollBottom();
   }
 
-  function addAI(text) {
+  function addAIMsgView(text, roomIcon, roomBadge) {
     const now = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
     const wrap = document.createElement('div');
     wrap.className = 'msg-wrap';
     wrap.innerHTML = `
       <div class="msg-ai">
-        <div class="ai-avatar">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/>
-          </svg>
-        </div>
+        <div class="ai-avatar">${roomIcon || '🏛️'}</div>
         <div class="diag-panel">
           <div class="panel-header">
-            <span class="panel-type">MULTI-AGENT CONSOLIDATED RESPONSE</span>
+            <span class="panel-type">${roomBadge || 'HQ MEETING'}</span>
             <div class="panel-divider"></div>
             <span class="panel-time">${now}</span>
           </div>
@@ -1034,35 +981,36 @@
     $input.value = '';
     resizeInput($input);
 
-    addUser(text);
-    history.push({ role: 'user', content: text });
+    const info = roomMetaInfo[currentRoom];
+    addUserMsgView(text);
+    histories[currentRoom].push({ role: 'user', content: text });
 
     loading = true;
     $send.disabled = true;
     addTyping();
-    highlightNodesActive(true);
 
     try {
       const res = await fetch('/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history })
+        body: JSON.stringify({
+          room: currentRoom,
+          messages: histories[currentRoom]
+        })
       });
 
       const data = await res.json();
       removeTyping();
-      highlightNodesActive(false);
 
       if (data.status === 'success' && data.reply) {
-        addAI(data.reply);
-        history.push({ role: 'assistant', content: data.reply });
+        addAIMsgView(data.reply, info.icon, info.badge);
+        histories[currentRoom].push({ role: 'assistant', content: data.reply });
       } else {
-        addAI(data.error || 'حدث خطأ في شبكة الوكلاء');
+        addAIMsgView(data.error || 'حدث خطأ في مقر العمل الرقمي', info.icon, info.badge);
       }
     } catch (err) {
       removeTyping();
-      highlightNodesActive(false);
-      addAI('تعذّر الاتصال بـ شبكة الوكلاء. تحقق من اتصالك.');
+      addAIMsgView('تعذّر الاتصال بمقر العمل الرقمي. تحقق من اتصالك.', info.icon, info.badge);
     } finally {
       loading = false;
       $send.disabled = false;

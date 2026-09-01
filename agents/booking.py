@@ -1,21 +1,22 @@
 """
-Booking & Service Scheduling Agent - Independent Execution Module
+Booking & Operations Scheduling Agent - Private Office & Boardroom Module
 """
 import requests
 
 DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions'
 
-BOOKING_SYSTEM_PROMPT = """أنت وكيل حجز المواعيد في ورشة "جار الله أوتو".
+BOOKING_SYSTEM_PROMPT = """أنت مدير المواعيد والعمليات التشغيلية في ورشة "جار الله أوتو".
 
-مهمتك المستقلة:
-- التعرف على ما إذا كان العميل يرغب في حجز موعد لفحص أو صيانة أو برمجة سيارته.
-- التأكد من طلب معلومات السيارة (نوع السيارة، الموديل، سنة الصنع) إن لم تكن مذكورة.
-- توفير فقرة واضحة لترتيب زيارة الورشة وحجز الموعد المفضل للعميل.
+تذكّر دائماً:
+- المستخدم الذي تتحدث معه الآن هو "المالك والرئيس التنفيذي لورشة جار الله أوتو" (Boss / Owner).
+- أنت في مكتب إدارة المواعيد وجدول العمليات (أو في اجتماع الإدارة).
+- تتحدث مع المالك باحترافية وتطلعه على طاقة الورشة الاستيعابية، جدول الزيارات، تنظيم المواعيد، وكيفية رفع كفاءة استقبال السيارات في ورشة جار الله أوتو.
+- تلتزم بأي توجيه أو سياسة مواعيد يحددها لك المالك فوراً.
 """
 
-def handle_booking_request(api_key, user_query):
+def talk_to_booking_office(api_key, messages):
     """
-    Independent API execution for Booking Agent.
+    1-on-1 private meeting in Operations & Booking Office with the Owner/Boss.
     """
     headers = {
         'Authorization': f'Bearer {api_key}',
@@ -25,18 +26,17 @@ def handle_booking_request(api_key, user_query):
     payload = {
         'model': 'deepseek-chat',
         'messages': [
-            {'role': 'system', 'content': BOOKING_SYSTEM_PROMPT},
-            {'role': 'user', 'content': f"تحقق من إمكانية حجز موعد لهذا الطلب: {user_query}"}
-        ],
+            {'role': 'system', 'content': BOOKING_SYSTEM_PROMPT}
+        ] + messages,
         'temperature': 0.5,
-        'max_tokens': 400
+        'max_tokens': 1200
     }
 
     try:
-        response = requests.post(DEEPSEEK_API_URL, json=payload, headers=headers, timeout=20)
+        response = requests.post(DEEPSEEK_API_URL, json=payload, headers=headers, timeout=30)
         if response.status_code == 200:
             res_json = response.json()
             return res_json['choices'][0]['message']['content']
-        return ""
-    except Exception:
-        return ""
+        return "أهلاً بك يا سعادة الرئيس في مكتب حجز المواعيد والعمليات. أنا في انتظار توجيهاتك لتنظيم جدول الورشة."
+    except Exception as e:
+        return f"أهلاً سعادة الرئيس، حدث خطأ: {str(e)}"

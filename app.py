@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import os
-from agents.orchestrator import process_user_request
+from agents.orchestrator import handle_hq_room_chat
 
 app = Flask(__name__)
 CORS(app)
@@ -14,7 +14,6 @@ def index():
 
 @app.route('/chat', methods=['POST'])
 def chat():
-    # Verify API key is set
     if not DEEPSEEK_API_KEY:
         return jsonify({
             'error': 'الـ API Key غير مضبوط على السيرفر. تواصل مع المسؤول.',
@@ -22,21 +21,23 @@ def chat():
         }), 500
 
     try:
-        data = request.json
+        data = request.json or {}
         messages = data.get('messages', [])
+        room = data.get('room', 'boardroom') # Default to Boardroom meeting with Boss
 
-        # Execute Multi-Agent Orchestrator Pipeline
-        reply = process_user_request(DEEPSEEK_API_KEY, messages)
+        # Execute HQ Office / Boardroom Meeting Chat
+        reply = handle_hq_room_chat(DEEPSEEK_API_KEY, room, messages)
 
         return jsonify({
             'reply': reply,
             'status': 'success',
-            'system_type': 'Multi-Agent Network'
+            'room': room,
+            'system_type': 'AutoOne Enterprise Virtual HQ'
         })
 
     except Exception as e:
         return jsonify({
-            'error': f'خطأ في شبكة الوكلاء: {str(e)}',
+            'error': f'خطأ في مقر العمل الرقمي: {str(e)}',
             'status': 'error'
         }), 500
 
@@ -44,13 +45,14 @@ def chat():
 def health():
     return jsonify({
         'status': 'ok',
-        'system': 'AutoOne Multi-Agent Network',
+        'system': 'AutoOne Enterprise Virtual HQ',
         'api_key_set': bool(DEEPSEEK_API_KEY),
-        'active_agents': [
-            'Chief Orchestrator',
-            'Dr. Auto Technical Diagnostic',
-            'Marketing & Customer Service',
-            'Booking & Scheduling'
+        'headquarters_rooms': [
+            'Executive Boardroom (غرفة الاجتماعات الجماعية)',
+            'Chief Orchestrator Private Office (مكتب المشرف العام)',
+            'Doctor Auto Technical Office (مكتب دكتور السيارات)',
+            'Marketing & Customer Service Office (مكتب التسويق والعملاء)',
+            'Operations & Booking Office (مكتب المواعيد والعمليات)'
         ]
     })
 

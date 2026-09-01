@@ -1,23 +1,22 @@
 """
-Doctor Auto - Independent Technical Diagnostic Agent
+Doctor Auto - Private Technical Office & Boardroom Module
 """
 import requests
 
 DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions'
 
-DOCTOR_AUTO_SYSTEM_PROMPT = """أنت د. سيارات (Dr. Auto) - الدكتور والاستشاري الهندسي الأول في صيانة وبرمجة السيارات بخبرة 30 سنة.
+DOCTOR_AUTO_SYSTEM_PROMPT = """أنت "د. سيارات" (Dr. Auto) - رئيس القسم التقني ودكتور الهندسة والصيانة في ورشة "جار الله أوتو".
 
-مهمتك المستقلة:
-- تحليل العطل الوارد في الاستفسار تحليلاً هندسياً دقيقاً.
-- تحديد الأسباب المحتملة والأجزاء الميكانيكية والكهربائية (مثل ECU, PCM, Transmission, MAF, Fuel Injectors, Alternator, ABS, etc.).
-- ذكر أكواد الأعطال المتوقعة (DTCs مثل P0300, P0420, P0171...).
-- تحديد خطورة المشكلة وخطوات الفحص الموصى بها بالترتيب.
-- قدّم تقريراً تقنياً خالصاً وموجزاً ومباشراً بدون مقدمات تسويقية.
+تذكّر دائماً:
+- المستخدم الذي تتحدث معه الآن هو "المالك والرئيس التنفيذي لورشة جار الله أوتو" (Boss / CEO).
+- أنت في مكتبك الخاص بالقسم التقني (أو في اجتماع الإدارة مع الرئيس).
+- تتحدث مع الرئيس بكل احترام ومهنية عالية وتطلعه على كافة التفاصيل الفنية، المعايير، الأجهزة (OBD-II, Launch, ECU tools)، وتناقش معه خُطط العمل والحلول التقنية والحد من المخاطر.
+- عندما يوجه لك الرئيس توجيهاً أو قانوناً جديداً، تلتزم به فوراً وتؤكّد تطبيقك له في قسمك التقني.
 """
 
-def get_technical_diagnosis(api_key, user_query):
+def talk_to_doctor_office(api_key, messages):
     """
-    Independent API execution for Dr. Auto Technical Agent.
+    1-on-1 private meeting in Doctor Auto's Technical Office with the Owner/Boss.
     """
     headers = {
         'Authorization': f'Bearer {api_key}',
@@ -27,11 +26,10 @@ def get_technical_diagnosis(api_key, user_query):
     payload = {
         'model': 'deepseek-chat',
         'messages': [
-            {'role': 'system', 'content': DOCTOR_AUTO_SYSTEM_PROMPT},
-            {'role': 'user', 'content': f"حلّل هذا العطل تقنياً: {user_query}"}
-        ],
-        'temperature': 0.3,
-        'max_tokens': 800
+            {'role': 'system', 'content': DOCTOR_AUTO_SYSTEM_PROMPT}
+        ] + messages,
+        'temperature': 0.5,
+        'max_tokens': 1200
     }
 
     try:
@@ -39,6 +37,6 @@ def get_technical_diagnosis(api_key, user_query):
         if response.status_code == 200:
             res_json = response.json()
             return res_json['choices'][0]['message']['content']
-        return "تعذّر الحصول على التقرير التقني من د. سيارات."
+        return "أهلاً بك يا سعادة الرئيس في المكتب التقني. حدث خطأ بسيط في الاتصال، تفضل بتوجيهك."
     except Exception as e:
-        return f"خطأ تقني في تحليل العطل: {str(e)}"
+        return f"أهلاً سعادة الرئيس، حدث خطأ أثناء معالجة التوجيه التقني: {str(e)}"
