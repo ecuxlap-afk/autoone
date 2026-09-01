@@ -1,18 +1,23 @@
 """
-Booking & Operations Module (Private Memory & Real Inter-Agent Consultation)
+Booking & Operations Module
+Updated with official Barq Al-Jazeera Center guidelines.
 """
 import requests
 from .memory import get_private_memory, record_private_memory
 
 DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions'
 
-BOOKING_SYSTEM_PROMPT = """أنت مدير المواعيد والعمليات التشغيلية في ورشة "جار الله أوتو".
+BOOKING_SYSTEM_PROMPT = """أنت مدير المواعيد والعمليات التشغيلية في "مركز برق الجزيرة" (صناعية أبها - تحت إشراف الفني جارالله - 0534669518).
+
+⛔ تحذير صارم جداً للهوية والاسم:
+- يمنع منعاً باتاً قطعي استخدام اسم "جارالله أوتو" أو "جار الله أوتو"!
+- الاسم الرسمي والوحيد المعتمد للمركز هو: "مركز برق الجزيرة" (أو "مركز جارالله - برق الجزيرة").
 
 صفاتك والدور المحدد لك:
-1. أنت المسؤول عن تنظيم المسارات التشغيلية، جدول الحجوزات، وحساب الطاقة الاستيعابية للورشة.
+1. أنت المسؤول عن تنظيم المسارات التشغيلية، جدول الحجوزات، وحساب الطاقة الاستيعابية للمركز.
 2. تترجم التشخيص الفني المعتمد من "د. سيارات" ورغبة العميل المعالجة من "التسويق" إلى مواعيد زمنية دقيقة وتنفيذ عملي.
 3. ممنوع منعاً باتاً اختلاق قصص أو أحداث وهمية سابقة.
-4. إجاباتك عملية، منظمة، ومباشرة بدون أي تكلف أو ادعاء."""
+4. إجاباتك عملية، منظمة، ومباشرة بدون أي تكلف."""
 
 def talk_to_booking_office(api_key, messages):
     private_mem = get_private_memory('booking')
@@ -31,25 +36,21 @@ def talk_to_booking_office(api_key, messages):
             res_text = response.json()['choices'][0]['message']['content']
             record_private_memory('booking', 'assistant', res_text)
             return res_text
-        return "أهلاً سعادة الرئيس في مكتب المواعيد والعمليات."
+        return "أهلاً سعادة الرئيس في مكتب المواعيد لمركز برق الجزيرة."
     except Exception as e:
         return f"أهلاً سعادة الرئيس، حدث خطأ: {str(e)}"
 
 def consult_booking_for_boardroom(api_key, boss_query, doctor_insight, marketing_insight):
-    """
-    Real inter-agent consultation: Booking reads Doctor's + Marketing's inputs,
-    consults HIS private scheduling memory, and responds to the Boss!
-    """
     private_mem = get_private_memory('booking')
     prompt_messages = [{'role': 'system', 'content': BOOKING_SYSTEM_PROMPT}]
     for m in private_mem[-4:]:
         prompt_messages.append(m)
 
-    prompt = f"""توجيه المالك والرئيس التنفيذي: '{boss_query}'
+    prompt = f"""توجيه المالك: '{boss_query}'
 رأي د. سيارات الفني: '{doctor_insight}'
 رأي مسؤول التسويق والخدمة: '{marketing_insight}'
 
-وجه كلامك لزميلك د. سيارات ومسؤول التسويق وللمالك، ووضع الخطة التشغيلية للمواعيد والجدول بناءً على ما طرحاه بحيوية وتفاعل حي."""
+وجه كلامك لزميلك د. سيارات ومسؤول التسويق وللمالك، ووضع الخطة التشغيلية للمواعيد والجدول بناءً على ما طرحاه."""
 
     prompt_messages.append({'role': 'user', 'content': prompt})
 
@@ -60,6 +61,6 @@ def consult_booking_for_boardroom(api_key, boss_query, doctor_insight, marketing
             content = res.json()['choices'][0]['message']['content']
             record_private_memory('booking', 'assistant', content)
             return content
-        return "حاضر يا سعادة الرئيس، جدول العمليات في الورشة جاهز للتنظيم حسب توجيهاتك."
+        return "جدول العمليات في مركز برق الجزيرة جاهز للتنظيم حسب توجيهاتك."
     except Exception:
-        return "حاضر يا سعادة الرئيس، قسم المواعيد والعمليات قيد التنفيذ."
+        return "قسم المواعيد والعمليات بمركز برق الجزيرة قيد التنفيذ."
