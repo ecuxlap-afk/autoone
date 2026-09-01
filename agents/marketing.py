@@ -64,6 +64,9 @@ def consult_marketing_for_boardroom(api_key, boss_query, doctor_insight):
             record_private_memory('marketing', 'assistant', content)
             return content
         return "أتأشرف بخدمتك يا سعادة الرئيس ومتابعة رضا العملاء بناءً على توجيهاتك."
+    except Exception:
+        return "حاضر يا سعادة الرئيس، فريق التسويق والخدمة ينفذ التوجيه."
+
 def handle_customer_external_chat(api_key, customer_msg, history=None):
     """
     Handles direct customer messages arriving from the external website contact/message system.
