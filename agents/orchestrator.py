@@ -1,48 +1,24 @@
 """
 Chief Orchestrator Agent (المدير والمشرف العام لـ جار الله أوتو)
-Real human-like, realistic, direct conversation with the Owner/Boss.
-NO FAKE STATS, NO INVENTED NUMBERS, NO CORPORATE FANTASY.
+Executes REAL Sequential Inter-Agent Consultations:
+1. Orchestrator opens boardroom meeting using HIS private memory.
+2. Doctor Auto responds using HIS private technical memory.
+3. Marketing Agent reads Doctor's input and responds using HIS private customer memory.
+4. Booking Agent reads Doctor's + Marketing's inputs and responds using HIS private operational memory.
 """
 import requests
-import re
-from .doctor_auto import talk_to_doctor_office
-from .marketing import talk_to_marketing_office
-from .booking import talk_to_booking_office
+from .memory import get_private_memory, record_private_memory
+from .doctor_auto import talk_to_doctor_office, consult_doctor_for_boardroom
+from .marketing import talk_to_marketing_office, consult_marketing_for_boardroom
+from .booking import talk_to_booking_office, consult_booking_for_boardroom
 
 DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions'
 
-BOARDROOM_SYSTEM_PROMPT = """أنت المشرف العام في ورشة "جار الله أوتو"، وتدير اجتماع مجلس الإدارة مع المالك والرئيس التنفيذي (The Owner / CEO).
+ORCHESTRATOR_SYSTEM_PROMPT = """أنت المشرف العام والمدير التنفيذي لورشة "جار الله أوتو".
 
-قوانين الصدق والواقعية المشددة:
-1. 🚫 **يمنع منعاً باتاً اختراع أو تأليف أرقام ونسب مئوية وهمية** (مثل: 78%، 30%، 4.5/5، أو اختراع أعداد سيارات وشكاوى من رأسك).
-2. 👥 **التحدث كبشر حقيقيين واقعيين 100%**: ينصت الفريق لتوجيهات المالك مباشرة، يناقش خطوات العمل الحقيقية، يطلب البيانات الحقيقية من المالك إن لزم الأمر، ويتفاعل بأسلوب صادق وواقعي دون أي كلام إنشائي أو دراما أو أرقام مفبركة.
-
-يشارك في هذا الاجتماع رؤساء الأقسام التاليين:
-1. 👔 المشرف العام (أنت)
-2. 🩺 د. سيارات (رئيس القسم التقني والفحص)
-3. 📢 مسؤول التسويق وخدمة العملاء
-4. 📅 مدير المواعيد والعمليات
-
-تعليمات التنسيق للمخرجات:
-قسّم الرد في اجتماع مجلس الإدارة إلى مداخلات واقعية وصادقة لكل وكيل باستخدام هذا الفاصل الدقيق:
-
-===AGENT:👔:المشرف العام (إدارة الاجتماع)===
-[مداخلتك المباشرة والواقعية كرئيس فريق يتناقش مع المالك]
-
-===AGENT:🩺:د. سيارات (رئيس القسم التقني)===
-[مداخلة دكتور السيارات التقنية الصادقة والواقعية حول الفحص والعمل]
-
-===AGENT:📢:مسؤول التسويق وخدمة العملاء===
-[مداخلة مسؤول التسويق الواقعية حول التواصل والخدمة دون أرقام مخترعة]
-
-===AGENT:📅:مدير المواعيد والعمليات===
-[مداخلة مدير المواعيد الواقعية حول التنظيم المباشر]
-
-تذكر: كُونوا أناس حقيقيين، واقعيين، صادقين، ينفذون توجيهات المالك بدون تأليف أو رسميات زائفة.
-"""
-
-ORCHESTRATOR_PRIVATE_PROMPT = """أنت المشرف العام لورشة "جار الله أوتو" في اجتماع خاص مغلق مع المالك والرئيس التنفيذي (The Owner / CEO).
-تتحدث معه كإنسان حقيقي واقعي وصادق 100%. لا تخترع أرقاماً أو نسباً وهمية من عندك. ينصت لأوامر المالك وينفذها بجدية وواقعية.
+ذاكرتك الخاصة وحريتك:
+- لديك ذاكرة الإدارة والمتابعة الخاصة بك من لقاءات المالك والرئيس التنفيذي السابقة.
+- ترحب بالمالك والرئيس التنفيذي (The Owner / CEO)، تفتح الاجتماع وتلخص القرارات بأسلوب واقعي، صادق، ومباشر دون أي أرقام وهمية أو تمثيل مسرحي.
 """
 
 def handle_hq_room_chat(api_key, room, messages):
@@ -55,66 +31,88 @@ def handle_hq_room_chat(api_key, room, messages):
     elif room == 'orchestrator':
         return talk_to_private_orchestrator(api_key, messages)
     else:
-        return run_boardroom_meeting(api_key, messages)
+        # Real Sequential Multi-Agent Inter-Discussion Boardroom Pipeline
+        return run_real_inter_agent_boardroom(api_key, messages)
 
 def talk_to_private_orchestrator(api_key, messages):
-    headers = {
-        'Authorization': f'Bearer {api_key}',
-        'Content-Type': 'application/json'
-    }
-    payload = {
-        'model': 'deepseek-chat',
-        'messages': [{'role': 'system', 'content': ORCHESTRATOR_PRIVATE_PROMPT}] + messages,
-        'temperature': 0.3,
-        'max_tokens': 1000
-    }
+    private_mem = get_private_memory('orchestrator')
+    latest_msg = messages[-1]['content'] if messages else ""
+    record_private_memory('orchestrator', 'user', latest_msg)
+
+    prompt_messages = [{'role': 'system', 'content': ORCHESTRATOR_SYSTEM_PROMPT}]
+    for m in private_mem[-6:]:
+        prompt_messages.append(m)
+    prompt_messages.append({'role': 'user', 'content': latest_msg})
+
+    headers = {'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'}
     try:
-        res = requests.post(DEEPSEEK_API_URL, json=payload, headers=headers, timeout=30)
-        return res.json()['choices'][0]['message']['content'] if res.status_code == 200 else "أهلاً سعادة الرئيس. تفضل بتوجيهك."
+        res = requests.post(DEEPSEEK_API_URL, json={'model': 'deepseek-chat', 'messages': prompt_messages, 'temperature': 0.3, 'max_tokens': 1000}, headers=headers, timeout=30)
+        if res.status_code == 200:
+            content = res.json()['choices'][0]['message']['content']
+            record_private_memory('orchestrator', 'assistant', content)
+            return content
+        return "أهلاً سعادة الرئيس في مكتب المدير العام."
     except Exception as e:
         return f"أهلاً سعادة الرئيس، حدث خطأ: {str(e)}"
 
-def run_boardroom_meeting(api_key, messages):
-    headers = {
-        'Authorization': f'Bearer {api_key}',
-        'Content-Type': 'application/json'
-    }
-    payload = {
-        'model': 'deepseek-chat',
-        'messages': [{'role': 'system', 'content': BOARDROOM_SYSTEM_PROMPT}] + messages,
-        'temperature': 0.3,
-        'max_tokens': 1500
-    }
+def run_real_inter_agent_boardroom(api_key, messages):
+    """
+    TRUE Sequential Multi-Agent Inter-Agent Discussion:
+    1. Orchestrator opens the boardroom using Orchestrator Private Memory.
+    2. Doctor Auto executes via HIS Private Memory -> generates technical consultation.
+    3. Marketing Agent executes via HIS Private Memory -> reads Doctor's consultation & generates marketing response.
+    4. Booking Agent executes via HIS Private Memory -> reads Doctor's + Marketing's inputs & generates booking response.
+    """
+    boss_query = messages[-1]['content'] if messages else "افتتاح اجتماع العمل لتوزيع المهام واستماع التوجيهات"
+
+    # Step 1: Orchestrator Opening
+    orch_private_mem = get_private_memory('orchestrator')
+    record_private_memory('orchestrator', 'user', boss_query)
+
+    orch_prompt = [{'role': 'system', 'content': ORCHESTRATOR_SYSTEM_PROMPT}]
+    for m in orch_private_mem[-4:]:
+        orch_prompt.append(m)
+    orch_prompt.append({'role': 'user', 'content': f"توجيه المالك والرئيس التنفيذي: '{boss_query}'. افتح النقاش باختصار وواقعية وبدون أرقام وهمية لفتح المجال لباقي رؤساء الأقسام."})
+
+    headers = {'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'}
+    orch_opening = "أهلاً بك يا سعادة الرئيس في اجتماع مجلس الإدارة. افتتحنا النقاش لمتابعة توجيهاتك السديدة مع رؤساء الأقسام."
     try:
-        res = requests.post(DEEPSEEK_API_URL, json=payload, headers=headers, timeout=35)
-        if res.status_code != 200:
-            return "أهلاً سعادة الرئيس في اجتماع مجلس الإدارة."
+        res1 = requests.post(DEEPSEEK_API_URL, json={'model': 'deepseek-chat', 'messages': orch_prompt, 'temperature': 0.3, 'max_tokens': 400}, headers=headers, timeout=30)
+        if res1.status_code == 200:
+            orch_opening = res1.json()['choices'][0]['message']['content']
+            record_private_memory('orchestrator', 'assistant', orch_opening)
+    except Exception:
+        pass
 
-        raw_text = res.json()['choices'][0]['message']['content']
-        return parse_boardroom_agents(raw_text)
+    # Step 2: Real Consultation Call to Doctor Auto Agent (Private Memory)
+    doctor_reply = consult_doctor_for_boardroom(api_key, boss_query)
 
-    except Exception as e:
-        return f"أهلاً سعادة الرئيس، حدث خطأ أثناء اجتماع مجلس الإدارة: {str(e)}"
+    # Step 3: Real Consultation Call to Marketing Agent (Private Memory + Reading Doctor Auto's Reply!)
+    marketing_reply = consult_marketing_for_boardroom(api_key, boss_query, doctor_reply)
 
-def parse_boardroom_agents(raw_text):
-    splits = re.split(r'===AGENT:(.*?):(.*?)\===\n?', raw_text)
+    # Step 4: Real Consultation Call to Booking Agent (Private Memory + Reading Doctor's & Marketing's Replies!)
+    booking_reply = consult_booking_for_boardroom(api_key, boss_query, doctor_reply, marketing_reply)
 
-    if len(splits) < 3:
-        return raw_text
-
-    agent_list = []
-    idx = 1
-    while idx < len(splits) - 2:
-        icon = splits[idx].strip()
-        title = splits[idx+1].strip()
-        content = splits[idx+2].strip()
-
-        if content:
-            agent_list.append({
-                'icon': icon or '👔',
-                'title': title or 'عضو مجلس الإدارة',
-                'content': content
-            })
-        idx += 3
-
-    return agent_list if agent_list else raw_text
+    # Return clean, separate agent response objects
+    return [
+        {
+            'icon': '👔',
+            'title': 'المشرف العام (افتتاح النقاش وإدارة الاجتماع)',
+            'content': orch_opening
+        },
+        {
+            'icon': '🩺',
+            'title': 'د. سيارات (رئيس القسم التقني والفحص)',
+            'content': doctor_reply
+        },
+        {
+            'icon': '📢',
+            'title': 'مسؤول التسويق وخدمة العملاء (استماع واستجابة تقنية)',
+            'content': marketing_reply
+        },
+        {
+            'icon': '📅',
+            'title': 'مدير المواعيد والعمليات (التنظيم والتنسيق التشغيلي)',
+            'content': booking_reply
+        }
+    ]
