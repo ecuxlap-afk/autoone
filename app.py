@@ -42,6 +42,10 @@ def index():
 
 @app.route('/chat', methods=['POST'])
 def chat():
+    # Check API key is configured
+    if not DEEPSEEK_API_KEY:
+        return jsonify({'error': 'الـ API Key غير مضبوط على السيرفر. تواصل مع المسؤول.', 'status': 'error'}), 500
+
     try:
         data = request.json
         messages = data.get('messages', [])
@@ -65,27 +69,46 @@ def chat():
             DEEPSEEK_API_URL,
             json=payload,
             headers=headers,
-            timeout=30
+            timeout=60
         )
 
-        result = response.json()
+        # Check HTTP status first
+        if response.status_code == 401:
+            return jsonify({'error': 'الـ API Key غير صحيح أو منتهي الصلاحية.', 'status': 'error'}), 401
+        if response.status_code == 402:
+            return jsonify({'error': 'رصيد DeepSeek غير كافٍ. يرجى شحن الرصيد.', 'status': 'error'}), 402
+        if response.status_code != 200:
+            return jsonify({'error': f'خطأ من DeepSeek: {response.status_code}', 'status': 'error'}), 500
+
+        # Try to parse JSON
+        try:
+            result = response.json()
+        except Exception:
+            return jsonify({'error': 'تعذّر قراءة رد DeepSeek. حاول مرة أخرى.', 'status': 'error'}), 500
 
         if 'choices' in result and len(result['choices']) > 0:
             reply = result['choices'][0]['message']['content']
             return jsonify({'reply': reply, 'status': 'success'})
         else:
-            error_msg = result.get('error', {}).get('message', 'خطأ غير معروف')
+            error_msg = result.get('error', {}).get('message', 'خطأ غير معروف من DeepSeek')
             return jsonify({'error': error_msg, 'status': 'error'}), 500
 
     except requests.exceptions.Timeout:
-        return jsonify({'error': 'انتهت مهلة الاتصال، حاول مرة أخرى', 'status': 'error'}), 504
+        return jsonify({'error': 'انتهت مهلة الاتصال (60 ثانية)، حاول مرة أخرى.', 'status': 'error'}), 504
+    except requests.exceptions.ConnectionError:
+        return jsonify({'error': 'تعذّر الاتصال بـ DeepSeek. تحقق من الإنترنت.', 'status': 'error'}), 503
     except Exception as e:
-        return jsonify({'error': f'حدث خطأ: {str(e)}', 'status': 'error'}), 500
+        return jsonify({'error': f'خطأ غير متوقع: {str(e)}', 'status': 'error'}), 500
 
 @app.route('/health')
 def health():
-    return jsonify({'status': 'ok', 'agent': 'Dr. Auto - خبير السيارات'})
+    return jsonify({
+        'status': 'ok',
+        'agent': 'Dr. Auto - خبير السيارات',
+        'api_key_set': bool(DEEPSEEK_API_KEY)
+    })
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
+
