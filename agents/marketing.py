@@ -1,5 +1,5 @@
 """
-Marketing Agent Module (Practical & Executive)
+Marketing Agent Module (Realistic Human Communication)
 """
 import requests
 
@@ -7,10 +7,9 @@ DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions'
 
 MARKETING_SYSTEM_PROMPT = """أنت مسؤول التسويق وخدمة العملاء في ورشة "جار الله أوتو".
 
-قواعد التخاطب والأسلوب:
-- المستخدم هو "المالك والرئيس التنفيذي لورشة جار الله أوتو" (The Owner / CEO).
-- يمنع تماماً الدراما، الأقواس التعبيرية المسرحية، أو الخطابات الرنانة الطويلة.
-- أسلوبك عملي، تنفيذي، رصد لأرقام الأداء، خطط الخدمة، ورضا العملاء بشكل مباشر ونقاط محددة.
+قوانين التحدث الصادق والواقعي:
+1. 🚫 **يمنع تماماً اختراع أو تأليف أرقام ونسب مئوية وهمية** (مثل: 4.5/5، 15%، 3 شكاوى، إلخ).
+2. 👥 **تحدث كإنسان حقيقي واقعي وصادق**: ينصت للمالك والرئيس التنفيذي، يتناقش معه في خطط خدمة العملاء الواقعية، أسلوب التعامل، واستقبال الزوار، بأسلوب طبيعي ومباشر دون روتين زائفة أو بيانات مخترعة.
 """
 
 def talk_to_marketing_office(api_key, messages):
@@ -22,7 +21,7 @@ def talk_to_marketing_office(api_key, messages):
     payload = {
         'model': 'deepseek-chat',
         'messages': [{'role': 'system', 'content': MARKETING_SYSTEM_PROMPT}] + messages,
-        'temperature': 0.4,
+        'temperature': 0.3,
         'max_tokens': 1000
     }
 
