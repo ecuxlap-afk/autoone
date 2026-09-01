@@ -1,6 +1,7 @@
 """
 Chief Orchestrator Agent (المدير والمشرف العام لـ جار الله أوتو)
 Manages Enterprise HQ Offices & Team Boardroom Meetings with the Owner/Boss.
+Strictly practical, executive, direct, and action-oriented. NO DRAMA OR THEATRICS.
 """
 import requests
 import re
@@ -10,43 +11,46 @@ from .booking import talk_to_booking_office
 
 DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions'
 
-BOARDROOM_SYSTEM_PROMPT = """أنت المشرف العام (Orchestrator) في ورشة "جار الله أوتو"، وتقوم بإدارة "اجتماع مجلس الإدارة الجماعي" (Boardroom Meeting) مع المالك والرئيس التنفيذي (The Owner / CEO).
+BOARDROOM_SYSTEM_PROMPT = """أنت المشرف العام (Orchestrator) في ورشة "جار الله أوتو"، وتقوم بإدارة "اجتماع مجلس الإدارة" مع المالك والرئيس التنفيذي (The Owner / CEO).
 
-يشارك معك في هذا الاجتماع رؤساء الأقسام التاليين:
+قانون النبرة والأسلوب الخارم:
+- يمنع تماماً أي دراما، تمثيل، أو أقواس تعبيرية مثل [يبتسم]، [يتنقل بنظره]، أو الخطابات العاطفية.
+- الأسلوب عملي جداً، مباشر، مهني، وتنفيذي 100%.
+- كل وكيل يذكر نقاط عمل حقيقية، قرارات، معايير تشغيلية، وتنفيذ فوري لأوامر المالك.
+
+يشارك في هذا الاجتماع رؤساء الأقسام التاليين:
 1. 👔 المشرف العام (أنت)
 2. 🩺 د. سيارات (رئيس القسم التقني والفحص)
 3. 📢 مسؤول التسويق وخدمة العملاء
 4. 📅 مدير المواعيد والعمليات
 
 تعليمات التنسيق الفائقة للمخرجات:
-قسّم الرد في اجتماع مجلس الإدارة إلى محطات ومداخلات منفصلة تماماً لكل وكيل باستخدام هذا الفاصل الدقيق:
+قسّم الرد في اجتماع مجلس الإدارة إلى مداخلات عمل منفصلة لكل وكيل باستخدام هذا الفاصل الدقيق:
 
 ===AGENT:👔:المشرف العام (إدارة الاجتماع)===
-[مداخلة المشرف العام والترحيب بالرئيس وفتح النقاش]
+[مداخلة المشرف العام العملية المباشرة وتلخيص الخطة]
 
 ===AGENT:🩺:د. سيارات (رئيس القسم التقني)===
-[مداخلة دكتور السيارات الفنية وتأكيد التزامه بالتعاليم للأعطال والأجهزة]
+[مداخلة دكتور السيارات الفنية: المعايير، الأجهزة، الفحص، والتنفيذ]
 
 ===AGENT:📢:مسؤول التسويق وخدمة العملاء===
-[مداخلة مسؤول التسويق وعرض خطط التعامل ورضا العملاء]
+[مداخلة مسؤول التسويق: الأداء، خطط الخدمة، ورضا العملاء]
 
 ===AGENT:📅:مدير المواعيد والعمليات===
-[مداخلة مدير المواعيد وتأكيد الجاهزية وتنظيم الطاقة الاستيعابية]
+[مداخلة مدير المواعيد: الطاقة الاستيعابية، الجدول، وحجز الزيارات]
 
-تذكر: المستخدم هو "المالك والرئيس التنفيذي"، وكل وكيل يخاطبه باحترام، مهنية عالية، وتأكيد التزام قسمه بتوجيهاته.
+تذكر: المستخدم هو "المالك والرئيس التنفيذي"، والرد عملي ومباشر ومختصر وبدون أي كلام إنشائي أو درامي.
 """
 
 ORCHESTRATOR_PRIVATE_PROMPT = """أنت المشرف العام والمدير التنفيذي لورشة "جار الله أوتو".
 أنت الآن في مكتبك الخاص في اجتماع مغلق 1-on-1 مع "المالك والرئيس التنفيذي" (The Owner / CEO).
-تتحدث معه باحترافية عن استراتيجية الورشة، متابعة أداء باقي الوكلاء، تفعيل التوجيهات والقوانين الجديدة، وتلبية كل أوامره الإدارية.
+
+قواعد الأسلوب:
+- يمنع تماماً الدراما أو الأقواس التعبيرية أو الخطابات الطويلة.
+- أسلوبك عملي، تنفيذ تنفيذي، رصد للأرقام، تنفيذ الأوامر والإداريات مباشرة وبدقة.
 """
 
 def handle_hq_room_chat(api_key, room, messages):
-    """
-    Routes chat to the requested HQ Office Room.
-    Returns either a single content string (for private offices)
-    or a structured list of separate agent responses (for Boardroom meetings).
-    """
     if room == 'doctor_auto':
         return talk_to_doctor_office(api_key, messages)
     elif room == 'marketing':
@@ -56,7 +60,6 @@ def handle_hq_room_chat(api_key, room, messages):
     elif room == 'orchestrator':
         return talk_to_private_orchestrator(api_key, messages)
     else:
-        # Boardroom Meeting with separate agent messages
         return run_boardroom_meeting(api_key, messages)
 
 def talk_to_private_orchestrator(api_key, messages):
@@ -67,12 +70,12 @@ def talk_to_private_orchestrator(api_key, messages):
     payload = {
         'model': 'deepseek-chat',
         'messages': [{'role': 'system', 'content': ORCHESTRATOR_PRIVATE_PROMPT}] + messages,
-        'temperature': 0.6,
-        'max_tokens': 1200
+        'temperature': 0.3,
+        'max_tokens': 1000
     }
     try:
         res = requests.post(DEEPSEEK_API_URL, json=payload, headers=headers, timeout=30)
-        return res.json()['choices'][0]['message']['content'] if res.status_code == 200 else "أهلاً سعادة الرئيس في مكتب المدير العام."
+        return res.json()['choices'][0]['message']['content'] if res.status_code == 200 else "أهلاً سعادة الرئيس. في انتظار توجيهاتك التنفيذية."
     except Exception as e:
         return f"أهلاً سعادة الرئيس، حدث خطأ: {str(e)}"
 
@@ -84,8 +87,8 @@ def run_boardroom_meeting(api_key, messages):
     payload = {
         'model': 'deepseek-chat',
         'messages': [{'role': 'system', 'content': BOARDROOM_SYSTEM_PROMPT}] + messages,
-        'temperature': 0.7,
-        'max_tokens': 1600
+        'temperature': 0.4,
+        'max_tokens': 1500
     }
     try:
         res = requests.post(DEEPSEEK_API_URL, json=payload, headers=headers, timeout=35)
@@ -93,26 +96,18 @@ def run_boardroom_meeting(api_key, messages):
             return "أهلاً سعادة الرئيس في اجتماع مجلس الإدارة."
 
         raw_text = res.json()['choices'][0]['message']['content']
-        parsed_agents = parse_boardroom_agents(raw_text)
-        return parsed_agents
+        return parse_boardroom_agents(raw_text)
 
     except Exception as e:
         return f"أهلاً سعادة الرئيس، حدث خطأ أثناء اجتماع مجلس الإدارة: {str(e)}"
 
 def parse_boardroom_agents(raw_text):
-    """
-    Parses ===AGENT:icon:title=== raw text into a clean list of individual agent objects.
-    """
-    pattern = r'===AGENT:(.*?):(.*? construct)?(.*?)===\n?'
-    # Find all matches
     splits = re.split(r'===AGENT:(.*?):(.*?)\===\n?', raw_text)
 
     if len(splits) < 3:
-        # Fallback if model didn't format delimiters
         return raw_text
 
     agent_list = []
-    # splits format: [preamble, icon1, title1, content1, icon2, title2, content2, ...]
     idx = 1
     while idx < len(splits) - 2:
         icon = splits[idx].strip()
