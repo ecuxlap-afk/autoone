@@ -7,6 +7,8 @@ import requests
 from .memory import get_private_memory, record_private_memory
 from .doctor_auto import consult_doctor_for_boardroom
 
+DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions'
+
 ALLOWED_PRICES = {
     'الغاء DOD': {'base': 300, 'floor': 150},
     'فحص كمبيوتر': {'base': 100, 'floor': 80},
