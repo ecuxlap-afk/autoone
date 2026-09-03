@@ -10,9 +10,12 @@ app = Flask(__name__)
 CORS(app)
 
 def get_api_key(data=None):
+    raw_key = ""
     if data and isinstance(data, dict) and data.get('api_key'):
-        return data.get('api_key')
-    return request.headers.get('X-Api-Key') or os.environ.get('DEEPSEEK_API_KEY', '')
+        raw_key = data.get('api_key')
+    else:
+        raw_key = request.headers.get('X-Api-Key') or os.environ.get('DEEPSEEK_API_KEY', '')
+    return raw_key.strip('\'" \t\r\n') if raw_key else ""
 
 @app.route('/')
 def index():
