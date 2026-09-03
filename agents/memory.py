@@ -48,6 +48,7 @@ def record_private_memory(agent_name, role, text):
         'role': role,
         'content': text
     })
+    _agent_memories[agent_name] = _agent_memories[agent_name][-50:]
     save_memories()
 
 # Initialize on import
