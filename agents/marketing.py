@@ -2,10 +2,179 @@
 Marketing Agent Module (Private Memory & Real Inter-Agent Consultation)
 Updated with strict official pricing, negotiation bounds, and strict branding guidelines.
 """
+import re
 import requests
 from .memory import get_private_memory, record_private_memory
+from .doctor_auto import consult_doctor_for_boardroom
 
-DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions'
+ALLOWED_PRICES = {
+    'الغاء DOD': {'base': 300, 'floor': 150},
+    'فحص كمبيوتر': {'base': 100, 'floor': 80},
+    'برمجة مراوح': {'base': 250, 'floor': 150},
+    'تنظيف بخاخات': {'base': 100, 'floor': 80},
+    'فحص تكييف': {'base': 300, 'floor': 150},
+    'تجديد وعزل الظفيرة': {'base': 800, 'floor': 700},
+    'فحص الدخان': {'base': 100, 'floor': 80},
+}
+
+def _all_allowed_price_values():
+    values = set()
+    for svc in ALLOWED_PRICES.values():
+        values.add(svc['base'])
+        values.add(svc['floor'])
+        for v in range(svc['floor'], svc['base'] + 1, 10):
+            values.add(v)
+    return values
+
+ALLOWED_PRICE_VALUES = _all_allowed_price_values()
+
+def _extract_mentioned_prices(text):
+    return [int(n) for n in re.findall(r'(\d{2,4})\s*ريال', text)]
+
+def _validate_prices(reply_text):
+    mentioned = _extract_mentioned_prices(reply_text)
+    invalid = [p for p in mentioned if p not in ALLOWED_PRICE_VALUES]
+    return len(invalid) == 0, invalid
+
+commercial_keywords = [
+    'سعر', 'كم', 'تكلفة', 'خصم', 'آخر', 'الآخر', 'غالين', 'غالي',
+    'نهائي', 'ريال', 'هات', 'بكم', 'وش السعر'
+]
+
+tech_keywords = [
+    'عطل', 'مشكلة', 'تفتفة', 'حرارة', 'صوت', 'لمبة', 'نتعة', 'تقطيع',
+    'دخان', 'ظفيرة', 'تكييف', 'بخاخات', 'طقطقة', 'رجة', 'يهز', 'اهتزاز',
+    'ما يشتغل', 'مايشتغل', 'واقف', 'طفى', 'مايدور', 'ما يدور', 'بطيء',
+    'ضعيف', 'خربان', 'يهنق', 'انطفى', 'مفصول', 'قطع', 'يفصل', 'يقطع'
+]
+
+def _needs_doctor_consultation(customer_msg, has_technical_word):
+    if has_technical_word:
+        return True
+    if len(customer_msg.strip()) > 60:
+        return True
+    return False
+
+def handle_customer_external_chat(api_key, customer_msg, history=None):
+    is_technical = any(kw in customer_msg for kw in tech_keywords)
+    should_consult = _needs_doctor_consultation(customer_msg, is_technical)
+
+    clean_history = []
+    if history and isinstance(history, list):
+        for h in history[-8:]:
+            if isinstance(h, dict):
+                r = h.get('role', 'user')
+                c = h.get('content', '')
+                if r in ['user', 'assistant'] and c:
+                    clean_history.append({'role': r, 'content': c})
+        if (clean_history and clean_history[-1]['role'] == 'user'
+                and clean_history[-1]['content'].strip() == customer_msg.strip()):
+            clean_history = clean_history[:-1]
+
+    has_history = len(clean_history) > 0
+
+    doctor_tech_input = ""
+    if should_consult:
+        context_snippet = ""
+        if clean_history:
+            last_turns = clean_history[-4:]
+            context_snippet = " | ".join(
+                f"{'العميل' if t['role']=='user' else 'المركز'}: {t['content']}"
+                for t in last_turns
+            )
+        doctor_query = (
+            (f"سياق المحادثة السابق: {context_snippet}\n" if context_snippet else "")
+            + f"استفسار عميل خارجي على موقع مركز برق الجزيرة: '{customer_msg}'"
+        )
+        doctor_tech_input = consult_doctor_for_boardroom(api_key, doctor_query)
+
+    deepseek_msgs = [{'role': 'system', 'content': MARKETING_SYSTEM_PROMPT}]
+    for h in clean_history:
+        deepseek_msgs.append(h)
+
+    no_greeting_rule = (
+        "\n4. 🛑 المحادثة جارية مسبقاً مع العميل: يُمنع منعاً باتاً وقاطعاً الترحيب "
+        "أو القول 'أهلاً بك' أو 'يا أهلاً وسهلاً' أو 'نوضح لك'! ادخل في صلب الجواب "
+        "والرد المباشر فوراً وبدون أي كلمة ترحيبية!"
+        if has_history else ""
+    )
+    no_menu_dump_rule = (
+        "\n5. 🛑 التزم بالخدمة المطلوبة في المحادثة فقط! يُحظر قاطعاً طباعة أو سرد "
+        "قائمة أسعار خدمات أخرى لم يطلبها العميل! إذا كان العميل يطلب 'السعر من الآخر' "
+        "أو النهائيات، اعتبر هذا طلباً صريحاً للخصم، وقدم السعر المخفض النهائي لهذه "
+        "الخدمة تحديداً فوراً دون سرد أي خدمة أخرى!"
+    )
+    floor_lock_rule = (
+        "\n6. 🛑 ثبات السعر وحظر الارتفاع: إذا تم تقديم سعر مخفض في الرسائل السابقة "
+        "(مثل 150 ريال)، يُحظر قاطعاً رفع السعر مجدداً في الرسالة التالية (مثل العودة "
+        "لـ 200 ريال)! تثبيت السعر الأدنى المعروض إجباري وصارم!"
+    )
+
+    doctor_block = (
+        f"\n(استشارة فنية مساعدة من د. سيارات: '{doctor_tech_input}')"
+        if doctor_tech_input else ""
+    )
+
+    current_prompt = f"""رسالة العميل الحالية: '{customer_msg}'{doctor_block}
+
+المطلوب: صياغة الرد التسويقي المناسب باستكمال المحادثة بدقة وأمانة وإيجاز مباشر.
+⚠️ تنبيهات حاسمة وواجبة الالتزام:
+1. التزم بالخدمة التي يناقشها العميل فقط! يمنع منعاً باتاً طبع قائمة خدمات أو أسعار أخرى لم يطلبها!
+2. التنبيه الميكانيكي (التكايات والقطع) خاص حصراً وخاص جداً بإلغاء نظام DOD! يُمنع منعاً باتاً ذكره في برمجة المراوح أو الفحص أو الخدمات الأخرى!
+3. مدة خدمات البرمجة والفحص هي (15 إلى 30 دقيقة فقط)، يمنع قاطعاً إيهام العميل أنها تستغرق يوماً كاملاً أو الاستلام غداً!{no_greeting_rule}{no_menu_dump_rule}{floor_lock_rule}
+المركز: مركز برق الجزيرة (تحت إشراف الفني جارالله - 0534669518 - صناعية أبها)."""
+
+    deepseek_msgs.append({'role': 'user', 'content': current_prompt})
+
+    headers = {'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'}
+
+    def _call_api(msgs):
+        return requests.post(
+            DEEPSEEK_API_URL,
+            json={'model': 'deepseek-chat', 'messages': msgs, 'temperature': 0.3, 'max_tokens': 600},
+            headers=headers,
+            timeout=30
+        )
+
+    reply_text = None
+    for _ in range(2):
+        try:
+            res = _call_api(deepseek_msgs)
+            if res.status_code == 200:
+                reply_text = res.json()['choices'][0]['message']['content']
+                break
+        except Exception:
+            continue
+
+    if reply_text is None:
+        if has_history:
+            return ("عذرًا، صار ضغط مؤقت على النظام 🙏 تقدر تعيد سؤالك، "
+                     "أو تتواصل مباشرة مع الفني جارالله على 0534669518.")
+        return ("أهلاً بك في مركز برق الجزيرة. يسعدنا خدمتك، بس صار خلل تقني بسيط — "
+                 "أعد إرسال رسالتك من فضلك أو كلم الفني جارالله على 0534669518.")
+
+    valid, invalid_prices = _validate_prices(reply_text)
+    if not valid:
+        warning_prompt = (
+            f"⚠️ تنبيه: في ردك السابق ذكرت سعر/أسعار غير معتمدة "
+            f"({', '.join(map(str, invalid_prices))} ريال). "
+            f"أعد صياغة نفس الرد لكن التزم حصريًا بالأسعار المعتمدة في تعليماتك."
+        )
+        retry_msgs = deepseek_msgs + [
+            {'role': 'assistant', 'content': reply_text},
+            {'role': 'user', 'content': warning_prompt}
+        ]
+        try:
+            res = _call_api(retry_msgs)
+            if res.status_code == 200:
+                corrected = res.json()['choices'][0]['message']['content']
+                valid2, _ = _validate_prices(corrected)
+                if valid2:
+                    reply_text = corrected
+        except Exception:
+            pass
+
+    return reply_text
 
 MARKETING_SYSTEM_PROMPT = """أنت ممثل خدمة العملاء والتسويق الاحترافي وخبيرة مبيعات الصيانة لـ "مركز برق الجزيرة" لصيانة وبرمجة السيارات في صناعية أبها (تحت إشراف الفني جارالله).
 
@@ -156,79 +325,3 @@ def consult_marketing_for_boardroom(api_key, boss_query, doctor_insight):
         return "في خدمة المالك ومركز برق الجزيرة."
     except Exception:
         return "فريق التسويق والخدمة بمركز برق الجزيرة في الخدمة."
-
-def handle_customer_external_chat(api_key, customer_msg, history=None):
-    """
-    Handles direct customer messages arriving from the website chat widget.
-    Consults Doctor Auto internally only when technical symptoms/queries are present,
-    maintains full conversation history context,
-    and returns a polite, accurate response following official pricing & negotiation policy.
-    """
-    from .doctor_auto import consult_doctor_for_boardroom
-
-    # Smart intent classification: Skip Doctor Auto for commercial/pricing queries
-    commercial_keywords = ['سعر', 'كم', 'تكلفة', 'خصم', 'آخر', 'الآخر', 'غالين', 'نهائي', 'ريال', 'هات']
-    tech_keywords = ['عطل', 'مشكلة', 'تفتفة', 'حرارة', 'صوت', 'لمبة', 'نتعة', 'تقطيع', 'دخان', 'ظفيرة', 'تكييف', 'بخاخات']
-    
-    is_commercial = any(kw in customer_msg for kw in commercial_keywords)
-    is_technical = any(kw in customer_msg for kw in tech_keywords)
-
-    doctor_tech_input = ""
-    if is_technical and not is_commercial:
-        doctor_tech_input = consult_doctor_for_boardroom(api_key, f"استفسار عميل خارجي على موقع مركز برق الجزيرة: '{customer_msg}'")
-
-    deepseek_msgs = [{'role': 'system', 'content': MARKETING_SYSTEM_PROMPT}]
-
-    # Filter & de-duplicate history (up to last 8 turns)
-    clean_history = []
-    if history and isinstance(history, list):
-        for h in history[-8:]:
-            if isinstance(h, dict):
-                r = h.get('role', 'user')
-                c = h.get('content', '')
-                if r in ['user', 'assistant'] and c:
-                    clean_history.append({'role': r, 'content': c})
-
-        # Trim last entry if duplicate of current user message
-        if clean_history and clean_history[-1]['role'] == 'user' and clean_history[-1]['content'].strip() == customer_msg.strip():
-            clean_history = clean_history[:-1]
-
-    for h in clean_history:
-        deepseek_msgs.append(h)
-
-    has_history = len(clean_history) > 0
-    no_greeting_rule = "\n4. 🛑 المحادثة جارية مسبقاً مع العميل: يُمنع منعاً باتاً وقاطعاً الترحيب أو القول 'أهلاً بك' أو 'يا أهلاً وسهلاً' أو 'نوضح لك'! ادخل في صلب الجواب والرد المباشر فوراً وبدون أي كلمة ترحيبية!" if has_history else ""
-    no_menu_dump_rule = "\n5. 🛑 التزم بالخدمة المطلوبة في المحادثة فقط! يُحظر قاطعاً طباعة أو سرد قائمة أسعار خدمات أخرى لم يطلبها العميل! إذا كان العميل يطلب 'السعر من الآخر' أو النهائيات، اعتبر هذا طلباً صريحاً للخصم، وقدم السعر المخفض النهائي لهذه الخدمة تحديداً فوراً دون سرد أي خدمة أخرى!"
-    floor_lock_rule = "\n6. 🛑 ثبات السعر وحظر الارتفاع: إذا تم تقديم سعر مخفض في الرسائل السابقة (مثل 150 ريال)، يُحظر قاطعاً رفع السعر مجدداً في الرسالة التالية (مثل العودة لـ 200 ريال)! تثبيت السعر الأدنى المعروض إجباري وصارم!"
-
-    # Prepare current turn prompt
-    if doctor_tech_input:
-        current_prompt = f"""رسالة العميل الحالية: '{customer_msg}'
-(استشارة فنية مساعدة من د. سيارات: '{doctor_tech_input}')
-
-المطلوب: صياغة الرد التسويقي المناسب باستكمال المحادثة بدقة وأمانة وإيجاز مباشر.
-⚠️ تنبيهات حاسمة وواجبة الالتزام:
-1. التزم بالخدمة التي يناقشها العميل فقط! يمنع منعاً باتاً طبع قائمة خدمات أو أسعار أخرى لم يطلبها!
-2. التنبيه الميكانيكي (التكايات والقطع) خاص حصراً وخاص جداً بإلغاء نظام DOD! يُمنع منعاً باتاً ذكره في برمجة المراوح أو الفحص أو الخدمات الأخرى!
-3. مدة خدمات البرمجة والفحص هي (15 إلى 30 دقيقة فقط)، يمنع قاطعاً إيهام العميل أنها تستغرق يوماً كاملاً أو الاستلام غداً!{no_greeting_rule}{no_menu_dump_rule}{floor_lock_rule}
-المركز: مركز برق الجزيرة (تحت إشراف الفني جارالله - 0534669518 - صناعية أبها)."""
-    else:
-        current_prompt = f"""رسالة العميل الحالية: '{customer_msg}'
-
-المطلوب: صياغة الرد التسويقي المناسب باستكمال المحادثة بدقة وأمانة وإيجاز مباشر.
-⚠️ تنبيهات حاسمة وواجبة الالتزام:
-1. التزم بالخدمة التي يناقشها العميل فقط! يمنع منعاً باتاً طبع قائمة خدمات أو أسعار أخرى لم يطلبها!
-2. التنبيه الميكانيكي (التكايات والقطع) خاص حصراً وخاص جداً بإلغاء نظام DOD! يُمنع منعاً باتاً ذكره في برمجة المراوح أو الفحص أو الخدمات الأخرى!
-3. مدة خدمات البرمجة والفحص هي (15 إلى 30 دقيقة فقط)، يمنع قاطعاً إيهام العميل أنها تستغرق يوماً كاملاً أو الاستلام غداً!{no_greeting_rule}{no_menu_dump_rule}{floor_lock_rule}
-المركز: مركز برق الجزيرة (تحت إشراف الفني جارالله - 0534669518 - صناعية أبها)."""
-
-    deepseek_msgs.append({'role': 'user', 'content': current_prompt})
-
-    headers = {'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'}
-    try:
-        res = requests.post(DEEPSEEK_API_URL, json={'model': 'deepseek-chat', 'messages': deepseek_msgs, 'temperature': 0.3, 'max_tokens': 600}, headers=headers, timeout=30)
-        if res.status_code == 200:
-            return res.json()['choices'][0]['message']['content']
-        return "أهلاً بك في مركز برق الجزيرة. يسعدنا تواصلك وخدمتك فوراً."
-    except Exception:
-        return "أهلاً بك في مركز برق الجزيرة. نسعد بخدمتك ومعالجة استفسارك فوراً."
