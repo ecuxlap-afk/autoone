@@ -1,12 +1,18 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import os
+from dotenv import load_dotenv
 from agents.orchestrator import handle_hq_room_chat
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY', '')
+def get_api_key(data=None):
+    if data and isinstance(data, dict) and data.get('api_key'):
+        return data.get('api_key')
+    return request.headers.get('X-Api-Key') or os.environ.get('DEEPSEEK_API_KEY', '')
 
 @app.route('/')
 def index():
@@ -14,19 +20,20 @@ def index():
 
 @app.route('/chat', methods=['POST'])
 def chat():
-    if not DEEPSEEK_API_KEY:
+    data = request.json or {}
+    api_key = get_api_key(data)
+    if not api_key:
         return jsonify({
-            'error': 'الـ API Key غير مضبوط على السيرفر. تواصل مع المسؤول.',
+            'error': 'الـ API Key غير مضبوط على السيرفر. يرجى إضافة DEEPSEEK_API_KEY في ملف .env أو إعدادات البيئة.',
             'status': 'error'
         }), 500
 
     try:
-        data = request.json or {}
         messages = data.get('messages', [])
         room = data.get('room', 'boardroom')
 
         # Execute HQ Office / Boardroom Meeting Chat
-        reply = handle_hq_room_chat(DEEPSEEK_API_KEY, room, messages)
+        reply = handle_hq_room_chat(api_key, room, messages)
 
         if isinstance(reply, list):
             # Boardroom multi-agent separate responses
@@ -59,18 +66,19 @@ def customer_api_chat():
     Public Customer Messaging API for external website integration.
     Accepts customer messages & conversation history from Jarallah Auto's chat widget.
     """
-    if not DEEPSEEK_API_KEY:
-        return jsonify({'error': 'API Key not configured', 'status': 'error'}), 500
+    data = request.json or {}
+    api_key = get_api_key(data)
+    if not api_key:
+        return jsonify({'error': 'API Key not configured. Please add DEEPSEEK_API_KEY in .env or environment settings.', 'status': 'error'}), 500
 
     try:
-        data = request.json or {}
         customer_msg = data.get('message', '') or data.get('text', '')
         history = data.get('history', [])
         if not customer_msg:
             return jsonify({'error': 'Message content is required', 'status': 'error'}), 400
 
         from agents.marketing import handle_customer_external_chat
-        reply = handle_customer_external_chat(DEEPSEEK_API_KEY, customer_msg, history=history)
+        reply = handle_customer_external_chat(api_key, customer_msg, history=history)
 
         return jsonify({
             'status': 'success',
@@ -82,10 +90,11 @@ def customer_api_chat():
 
 @app.route('/health')
 def health():
+    api_key = get_api_key()
     return jsonify({
         'status': 'ok',
         'system': 'AutoOne Enterprise Virtual HQ',
-        'api_key_set': bool(DEEPSEEK_API_KEY)
+        'api_key_set': bool(api_key)
     })
 
 if __name__ == '__main__':
