@@ -62,10 +62,14 @@ def handle_customer_external_chat(api_key, customer_msg, history=None):
 
     clean_history = []
     if history and isinstance(history, list):
-        for h in history[-8:]:
+        for h in history[-10:]:
             if isinstance(h, dict):
-                r = h.get('role', 'user')
-                c = h.get('content', '')
+                r = str(h.get('role') or h.get('sender') or h.get('author') or h.get('type') or 'user').lower()
+                c = str(h.get('content') or h.get('text') or h.get('message') or '').strip()
+                if r in ['bot', 'agent', 'assistant', 'system', 'ai']:
+                    r = 'assistant'
+                elif r in ['user', 'customer', 'client', 'me']:
+                    r = 'user'
                 if r in ['user', 'assistant'] and c:
                     clean_history.append({'role': r, 'content': c})
         if (clean_history and clean_history[-1]['role'] == 'user'

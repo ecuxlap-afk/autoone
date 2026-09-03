@@ -78,7 +78,7 @@ def customer_api_chat():
 
     try:
         customer_msg = data.get('message', '') or data.get('text', '')
-        history = data.get('history', [])
+        history = data.get('history') or data.get('messages') or data.get('chat_history') or []
         if not customer_msg:
             return jsonify({'error': 'Message content is required', 'status': 'error'}), 400
 
