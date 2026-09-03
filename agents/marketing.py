@@ -166,26 +166,37 @@ def handle_customer_external_chat(api_key, customer_msg, history=None):
     """
     from .doctor_auto import consult_doctor_for_boardroom
 
-    # Check if technical consultation is needed
-    tech_keywords = ['عطل', 'مشكلة', 'تفتفة', 'حرارة', 'صوت', 'لمبة', 'نتعة', 'تقطيع', 'دخان', 'ظفيرة', 'كمبيوتر', 'DOD', 'مراوح', 'تكييف', 'بخاخات', 'فحص']
-    is_technical_query = any(kw in customer_msg for kw in tech_keywords)
+    # Smart intent classification: Skip Doctor Auto for commercial/pricing queries
+    commercial_keywords = ['سعر', 'كم', 'تكلفة', 'خصم', 'آخر', 'الآخر', 'غالين', 'نهائي', 'ريال', 'هات']
+    tech_keywords = ['عطل', 'مشكلة', 'تفتفة', 'حرارة', 'صوت', 'لمبة', 'نتعة', 'تقطيع', 'دخان', 'ظفيرة', 'تكييف', 'بخاخات']
+    
+    is_commercial = any(kw in customer_msg for kw in commercial_keywords)
+    is_technical = any(kw in customer_msg for kw in tech_keywords)
 
     doctor_tech_input = ""
-    if is_technical_query:
+    if is_technical and not is_commercial:
         doctor_tech_input = consult_doctor_for_boardroom(api_key, f"استفسار عميل خارجي على موقع مركز برق الجزيرة: '{customer_msg}'")
 
     deepseek_msgs = [{'role': 'system', 'content': MARKETING_SYSTEM_PROMPT}]
 
-    # Append previous history if available (up to last 8 turns)
+    # Filter & de-duplicate history (up to last 8 turns)
+    clean_history = []
     if history and isinstance(history, list):
         for h in history[-8:]:
             if isinstance(h, dict):
                 r = h.get('role', 'user')
                 c = h.get('content', '')
                 if r in ['user', 'assistant'] and c:
-                    deepseek_msgs.append({'role': r, 'content': c})
+                    clean_history.append({'role': r, 'content': c})
 
-    has_history = bool(history and isinstance(history, list) and len(history) > 0)
+        # Trim last entry if duplicate of current user message
+        if clean_history and clean_history[-1]['role'] == 'user' and clean_history[-1]['content'].strip() == customer_msg.strip():
+            clean_history = clean_history[:-1]
+
+    for h in clean_history:
+        deepseek_msgs.append(h)
+
+    has_history = len(clean_history) > 0
     no_greeting_rule = "\n4. 🛑 المحادثة جارية مسبقاً مع العميل: يُمنع منعاً باتاً وقاطعاً الترحيب أو القول 'أهلاً بك' أو 'يا أهلاً وسهلاً' أو 'نوضح لك'! ادخل في صلب الجواب والرد المباشر فوراً وبدون أي كلمة ترحيبية!" if has_history else ""
     no_menu_dump_rule = "\n5. 🛑 التزم بالخدمة المطلوبة في المحادثة فقط! يُحظر قاطعاً طباعة أو سرد قائمة أسعار خدمات أخرى لم يطلبها العميل! إذا كان العميل يطلب 'السعر من الآخر' أو النهائيات، اعتبر هذا طلباً صريحاً للخصم، وقدم السعر المخفض النهائي لهذه الخدمة تحديداً فوراً دون سرد أي خدمة أخرى!"
     floor_lock_rule = "\n6. 🛑 ثبات السعر وحظر الارتفاع: إذا تم تقديم سعر مخفض في الرسائل السابقة (مثل 150 ريال)، يُحظر قاطعاً رفع السعر مجدداً في الرسالة التالية (مثل العودة لـ 200 ريال)! تثبيت السعر الأدنى المعروض إجباري وصارم!"

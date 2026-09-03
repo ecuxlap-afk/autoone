@@ -9,8 +9,10 @@ Stores private persistent memory and learning logs independently for each agent:
 
 import json
 import os
+import threading
 
 MEMORY_FILE = 'agents_private_memory.json'
+_memory_lock = threading.Lock()
 
 _agent_memories = {
     'orchestrator': [],
@@ -36,20 +38,22 @@ def save_memories():
         pass
 
 def get_private_memory(agent_name, limit=10):
-    load_memories()
-    mem = _agent_memories.get(agent_name, [])
-    return mem[-limit:]
+    with _memory_lock:
+        load_memories()
+        mem = _agent_memories.get(agent_name, [])
+        return mem[-limit:]
 
 def record_private_memory(agent_name, role, text):
-    load_memories()
-    if agent_name not in _agent_memories:
-        _agent_memories[agent_name] = []
-    _agent_memories[agent_name].append({
-        'role': role,
-        'content': text
-    })
-    _agent_memories[agent_name] = _agent_memories[agent_name][-50:]
-    save_memories()
+    with _memory_lock:
+        load_memories()
+        if agent_name not in _agent_memories:
+            _agent_memories[agent_name] = []
+        _agent_memories[agent_name].append({
+            'role': role,
+            'content': text
+        })
+        _agent_memories[agent_name] = _agent_memories[agent_name][-50:]
+        save_memories()
 
 # Initialize on import
 load_memories()
