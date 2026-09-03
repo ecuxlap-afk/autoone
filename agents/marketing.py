@@ -136,13 +136,16 @@ def handle_customer_external_chat(api_key, customer_msg, history=None):
         )
 
     reply_text = None
-    for _ in range(2):
+    for attempt in range(2):
         try:
             res = _call_api(deepseek_msgs)
             if res.status_code == 200:
                 reply_text = res.json()['choices'][0]['message']['content']
                 break
-        except Exception:
+            else:
+                print(f"⚠️ [DeepSeek API Error] Attempt {attempt+1}: Status {res.status_code} - Body: {res.text}")
+        except Exception as e:
+            print(f"⚠️ [DeepSeek API Exception] Attempt {attempt+1}: {str(e)}")
             continue
 
     if reply_text is None:
